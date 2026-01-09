@@ -24,6 +24,7 @@ The directory structure of the project looks like this:
 ├── configs/                  # Configuration files
 ├── data/                     # Data directory
 │   ├── processed
+│   ├── interrim
 │   └── raw
 ├── dockerfiles/              # Dockerfiles
 │   ├── api.Dockerfile
