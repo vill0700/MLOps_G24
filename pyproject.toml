@@ -19,6 +19,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi==0.115.6",
+    "gliner2>=1.2.3",
     "torch==2.2.2",
     "typer==0.15.1",
     "uvicorn==0.34.0",
@@ -38,12 +39,12 @@ dev = [
 
 
 [tool.uv.sources]
-torch = [
-    { index = "pytorch-cpu" },
-]
-torchvision = [
-    { index = "pytorch-cpu" },
-]
+# torch = [
+#     { index = "pytorch-cpu" },
+# ]
+# torchvision = [
+#     { index = "pytorch-cpu" },
+# ]
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
