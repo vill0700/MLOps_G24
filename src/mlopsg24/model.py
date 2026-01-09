@@ -1,16 +1,17 @@
-from torch import nn
 import torch
+import torch.nn as nn
 
-class Model(nn.Module):
-    """Just a dummy model to show how to structure your code"""
-    def __init__(self):
+class JobAdClassifier(nn.Module):
+    def __init__(self, input_dim=768, num_classes=20):
         super().__init__()
-        self.layer = nn.Linear(1, 1)
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, num_classes)
+        )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.layer(x)
-
-if __name__ == "__main__":
-    model = Model()
-    x = torch.rand(1)
-    print(f"Output shape of model: {model(x).shape}")
+    def forward(self, x):
+        # x: (batch, 768)
+        return self.net(x)  # logits: (batch, 20)
