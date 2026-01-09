@@ -2,11 +2,14 @@
 Our main objective with this project is to create a machine learning process that extracts data from Jobnet, transforms it, and uses it to train a model to match an external joblisting to one of Jobnet's predefined job categories.
 
 The framework of the project is as follows:
-1. **Data Extraction**: We extract joblisting data from Jobnet using (...). This data includes job titles, descriptions, and associated categories (**More?**).
-2. **Data Transformation**: The extracted data is then cleaned and transformed to ensure it is in a suitable format for model training. This includes (...).
-3. **Model Training**: We use the transformed data to train a machine learning model. Our baseline model is a pretrained sentence transformer that uses Cosine similarity as the similarity measure. Depending on how the data distributes into the predefined categories, we intend to use either a classification model (ANN) or a clustering approach (KNN) to categorize the joblistings.
+1. **Data Extraction**: From a private database we extract job vacancies from Jobnet. Data is tabular with fields of  the job vacancy text itself and ~20 classes of job type. Job vacancy texts contain personal information and noisy text not relevant to the job type, which is cleaned using GLINER2 configure to only extracts occupation, skills and task. These are then rewritten to a string to be more compatible with a standard SentenceTransformer embedding model. This data is made available to the entire group.
+2. **Data Transformation**:
+    The extracted data text are transformed into a text embedding using SentenceTransformer.
+    Returns transformed data of labelled classes to vector embeddings of a pytorch tensor datatype of floats.
+    The model chosen is *sentence-transformers/paraphrase-multilingual-mpnet-base-v2*, which is an older but standard multilingual text embedding model. For further performance could be considered, models such as *intfloat/multilingual-e5-large-instruct* can be used - which requires a prefix, or finetuning a text embedding model with SentenceTransformerTrainer using GenAI to judge triplet textdata of anchor: posive,negative data.
+3. **Model Training**: We use the transformed data to train a machine learning model. Our baseline model is a pretrained sentence transformer that uses Cosine similarity as the similarity measure. Depending on how the data distributes into the predefined categories, we intend to use either a classification model (ANN) or a clustering approach (KNN) to categorize the job vacancies.
 4. **Model Evaluation**: After training, we evaluate the model's performance using appropriate metrics such as accuracy, precision, recall, and F1-score (**Hvis relevant**). We also perform cross-validation to ensure the model's robustness (**Igen, hvis relevant**).
-5. **Deployment**: Finally, we deploy the trained model to a production environment where it can be used to classify new joblistings and match them to Jobnet's categories.# mlopsg24
+5. **Deployment**: Finally, we deploy the trained model to a production environment where it can be used to classify new job vacancies and match them to Jobnet's categories.# mlopsg24
 
 jobannonce classifier
 
@@ -34,10 +37,11 @@ The directory structure of the project looks like this:
 ├── reports/                  # Reports
 │   └── figures/
 ├── src/                      # Source code
-│   ├── project_name/
+│   ├── mlopsg24/
 │   │   ├── __init__.py
 │   │   ├── api.py
-│   │   ├── data.py
+│   │   ├── data_create.py
+│   │   ├── data_preproces.py
 │   │   ├── evaluate.py
 │   │   ├── models.py
 │   │   ├── train.py
