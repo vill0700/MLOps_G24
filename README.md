@@ -41,8 +41,8 @@ The directory structure of the project looks like this:
 │   ├── mlopsg24/
 │   │   ├── __init__.py
 │   │   ├── api.py
-│   │   ├── data_create.py
-│   │   ├── data_preproces.py
+│   │   ├── data_create.py    # extracts data from a private db - cannot be run
+│   │   ├── data_preproces.py # module to embed texts
 │   │   ├── evaluate.py
 │   │   ├── models.py
 │   │   ├── train.py

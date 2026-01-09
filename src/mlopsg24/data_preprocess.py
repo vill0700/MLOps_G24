@@ -1,33 +1,58 @@
 from pathlib import Path
-
-import typer
-from torch.utils.data import Dataset
-
 from loguru import logger
+import typer
+import torch
+from sentence_transformers import SentenceTransformer
+import polars as pl
 
-class MyDataset(Dataset):
-    """My custom dataset."""
+class PreprocessData():
 
-    def __init__(self, data_path: Path) -> None:
-        self.data_path = data_path
+    def __init__(
+        self,
+        path_text_embedder:Path=Path("models/intfloat/multilingual-e5-large-instruct"),
+        file_text_data:Path=Path("data/raw/training_jobopslag.parquet"),
+        do_split:bool=True,
+    ) -> None:
 
-    def __len__(self) -> int:
-        """Return the length of the dataset."""
+        self.path_text_embedder = path_text_embedder
+        self.file_text_data = file_text_data
+        self.do_split = do_split
 
-    def __getitem__(self, index: int):
-        """Return a given sample from the dataset."""
 
-    def preprocess(self, output_folder: Path) -> None:
-        """Preprocess the raw data and save it to the output folder."""
+    def init_text_embedder(self):
+        """Initialize SentenceTransformer model for text embeddings."""
 
-def preprocess(
-    data_path: Path
-):
+        self.text_embedder = SentenceTransformer(
+            model_name_or_path = self.path_text_embedder,
+            device = 'cuda',
+        )
 
-    logger.info("Preprocessing data...")
-    dataset = MyDataset(data_path)
-    # dataset.preprocess(output_folder)
+    def embed(self):
+        df_jobopslag = pl.read_parquet(self.file_text_data)
+
+        list_sentences = (
+            df_jobopslag
+            .select("ann_id")
+            .to_series()
+            .to_list()
+        )
+
+        return self.text_embedder.encode(
+            sentences = list_sentences,
+            prompt="Instruct: Retrieve semantically similar text.\n Query: ",
+            convert_to_tensor=True,
+        )
+
+    def __call__(self):
+        self.init_text_embedder()
+
+        if self.do_split:
+            # split targets, features into training, test and training
+            pass
+        else:
+            # return targets, features
+
 
 
 if __name__ == "__main__":
-    typer.run(preprocess)
+    # typer.run(embed_texts)
