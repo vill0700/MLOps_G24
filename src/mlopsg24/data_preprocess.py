@@ -1,58 +1,180 @@
+#%%
 from pathlib import Path
 from loguru import logger
 import typer
 import torch
 from sentence_transformers import SentenceTransformer
 import polars as pl
+from sklearn.model_selection import train_test_split
+
 
 class PreprocessData():
 
     def __init__(
         self,
-        path_text_embedder:Path=Path("models/intfloat/multilingual-e5-large-instruct"),
-        file_text_data:Path=Path("data/raw/training_jobopslag.parquet"),
-        do_split:bool=True,
+        path_text_embedder: Path = Path("models/intfloat/multilingual-e5-large-instruct"),
+        file_data_raw: Path = Path("data/raw/training_jobopslag.parquet"),
+        do_split: bool = True,
+        test_size: float = 0.2,
+        val_size: float = 0.1,
+        random_state: int = 42,
+        output_dir: Path = Path("data/processed"),
+        target_class:str= "erhvervsomraade_txt",
+        embedding_prefix:str=(
+            "Classify the following extracted texts of occupation, skills"
+            "and tasks from a Danish job vacancy into job category"
+        ),
     ) -> None:
 
         self.path_text_embedder = path_text_embedder
-        self.file_text_data = file_text_data
+        self.file_data_raw = file_data_raw
         self.do_split = do_split
+        self.test_size = test_size
+        self.val_size = val_size
+        self.random_state = random_state
+        self.output_dir = output_dir
+        self.target_class = target_class
+        self.embedding_prefix = embedding_prefix
+
+
+    def extract_input_data(self) -> None:
+        """
+        Mount raw data to dataframe
+        """
+
+        logger.info(f"Reading data from {self.file_data_raw}")
+        self.df_jobopslag = pl.read_parquet(self.file_data_raw)
 
 
     def init_text_embedder(self):
-        """Initialize SentenceTransformer model for text embeddings."""
+        """
+        Initialize SentenceTransformer model for text embeddings.
+        """
+        logger.info(f"Loading text embedder from {self.path_text_embedder}")
 
         self.text_embedder = SentenceTransformer(
-            model_name_or_path = self.path_text_embedder,
-            device = 'cuda',
+            model_name_or_path = str(self.path_text_embedder),
+            device='cuda' if torch.cuda.is_available() else 'cpu',
         )
 
-    def embed(self):
-        df_jobopslag = pl.read_parquet(self.file_text_data)
+    def create_x_features(self):
+        """
+        Create text embeddings used as x features.
+        """
 
         list_sentences = (
-            df_jobopslag
+            self.df_jobopslag
             .select("ann_id")
             .to_series()
             .to_list()
         )
 
-        return self.text_embedder.encode(
-            sentences = list_sentences,
-            prompt="Instruct: Retrieve semantically similar text.\n Query: ",
+        logger.info(f"Creating embeddings for {len(list_sentences)} observations")
+
+        self.x_features = self.text_embedder.encode(
+            sentences=list_sentences,
             convert_to_tensor=True,
+            show_progress_bar=True,
+            prompt=self.embedding_prefix
         )
 
-    def __call__(self):
+        logger.info(f"x features embeddings shape: {self.x_features.shape}")
+
+
+    def create_y_target(self):
+        """
+        Create categorical y target features
+        Saves mapping of y idx to classes to parquet table
+        """
+
+        y_categories = self.df_jobopslag.select(self.target_class).to_series()
+
+        # Create mapping from categories to indices
+        unique_categories = y_categories.unique().sort()
+        category_to_idx = {cat: idx for idx, cat in enumerate(unique_categories)}
+
+        # Convert to tensor
+        self.y_targets = torch.tensor(
+            [category_to_idx[cat] for cat in y_categories.to_list()],
+            dtype=torch.long
+        )
+
+        # save mapping of categories
+        (
+            pl.DataFrame(
+                data=list(category_to_idx.items()),
+                schema=("categori", "idx"),
+                orient='row',
+                )
+            .write_parquet(self.output_dir / "category_mapping.parquet")
+        )
+
+        logger.info(f"Targets shape: {self.y_targets.shape}")
+        logger.info(f"Number of classes: {len(unique_categories)}")
+
+
+    def split_data(self) -> None:
+        """
+        Split data into train, validation, and test sets.
+        """
+        logger.info("Splitting data into train/val/test sets")
+
+        x_temp, self.x_test, y_temp, self.y_test = train_test_split(
+            self.x_features, self.y_targets,
+            test_size=self.test_size,
+            random_state=self.random_state,
+            stratify=self.y_targets  # Maintain class distribution
+        )
+
+        # Second split: separate validation from training
+        # Adjust val_size relative to temp size to ensure equal distribution
+        val_size_adjusted = self.val_size / (1 - self.test_size)
+        self.x_train, self.x_val, self.y_train, self.y_val = train_test_split(
+            x_temp, y_temp,
+            test_size=val_size_adjusted,
+            random_state=self.random_state,
+            stratify=y_temp
+        )
+
+        logger.info(f"Train set: {self.x_train.shape[0]} samples")
+        logger.info(f"Validation set: {self.x_val.shape[0]} samples")
+        logger.info(f"Test set: {self.x_test.shape[0]} samples")
+
+
+    def save_data(self) -> None:
+        """
+        Save train,test,validation for x and y as tensors to .pt files.
+        """
+        logger.info("Saving data")
+
+        torch.save(self.x_train, self.output_dir / "x_train.pt")
+        torch.save(self.x_val, self.output_dir / "x_val.pt")
+        torch.save(self.x_test, self.output_dir / "x_test.pt")
+        torch.save(self.y_train, self.output_dir / "y_train.pt")
+        torch.save(self.y_val, self.output_dir / "y_val.pt")
+        torch.save(self.y_test, self.output_dir / "y_test.pt")
+
+        logger.info(f"All tensors saved successfully to {self.output_dir}")
+
+
+    def main(self):
+        """
+        Main preprocessing pipeline.
+        """
+        logger.info("Starting preprocessing pipeline")
+
+        self.extract_input_data()
         self.init_text_embedder()
+        self.create_x_features()
+        self.create_y_target()
+        self.split_data()
+        self.save_data()
 
-        if self.do_split:
-            # split targets, features into training, test and training
-            pass
-        else:
-            # return targets, features
-
+        logger.info("Preprocessing complete with train/val/test split")
 
 
 if __name__ == "__main__":
-    # typer.run(embed_texts)
+    # Run preprocessing
+    PreprocessData().main()
+
+# %%
