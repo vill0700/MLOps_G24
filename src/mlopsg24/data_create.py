@@ -8,10 +8,12 @@ import uuid
 from gliner2 import GLiNER2
 from pathlib import Path
 from loguru import logger
+import os
 
 #Internal package, not publicly avaiable
 from bmdb import db_uri
 
+os.environ["POLARS_MAX_THREADS"] = "25"
 
 def entities_to_natural_language(
     jobopslag_text:str,
@@ -77,6 +79,59 @@ def prepare_text(
 
     )
 
+def prepare_text_gpu(df_jobopslag_raw: pl.DataFrame, model_gliner2: GLiNER2, batch_size: int = 32) -> pl.DataFrame:
+    # 1. Fast UUID generation
+    uuids = [str(uuid.uuid4()) for _ in range(df_jobopslag_raw.height)]
+
+    # 2. Extract texts to process
+    all_texts = df_jobopslag_raw["annonce_tekst"].to_list()
+    results = []
+    entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
+
+    # 3. Batch processing loop
+    for i in range(0, len(all_texts), batch_size):
+        batch = all_texts[i : i + batch_size]
+
+        # Inference
+        batch_output = [model_gliner2.extract_entities(text, entities) for text in batch]
+
+        # 4. Process each item individually to maintain list length
+        for idx, dict_extracted in enumerate(batch_output):
+            try:
+                dict_extracted['entities']['stillingsbetegnelser']
+                str_stil = f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} . "
+            except:
+                str_stil =''
+            try:
+                dict_extracted['entities']['kompetencer']
+                str_komp = f"{', '.join(dict_extracted['entities']['kompetencer'])} . "
+            except:
+                str_komp =''
+            try:
+                dict_extracted['entities']['arbejdsopgaver']
+                str_opg = f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} . "
+            except:
+                str_opg =''
+
+            try:
+                str_nl = str_stil+str_komp+str_opg
+                # str_nl = (
+                #     f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} . "
+                #     f"{', '.join(dict_extracted['entities']['kompetencer'])}, "
+                #     f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} "
+                # )
+                results.append(str_nl)
+            except Exception as e:
+                logger.error(f"FAILED extraction at row {i + idx}: {e}")
+                results.append(None)
+
+    # 5. Add columns and then drop the rows where results were None
+    return df_jobopslag_raw.with_columns([
+        pl.Series("ann_id", uuids),
+        pl.Series("annonce_tekst", results)
+    ]).drop_nulls(subset=["annonce_tekst"])
+
+
 def pipeline_data_create(
     path_model_gliner2:Path=Path("models/fastino/gliner2-multi-v1"),
     path_output:Path=Path("data/raw/training_jobopslag.parquet"),
@@ -116,26 +171,29 @@ def pipeline_data_create(
                 ) AS c ON a.concepturida = c.uri_key
             WHERE DATE_PART('year',a.startdt) BETWEEN 2022 AND 2024 -- NOTE:years with clean data
 
-            LIMIT 100 --DEV
+--             LIMIT 10000 --DEV
         """,
         uri=db_uri()
     )
 
     logger.info("Loading hf model")
     model_gliner2 = GLiNER2.from_pretrained(path_model_gliner2)
+    model_gliner2.to("cuda")
 
     logger.info("Transforming data")
-    df_cleaned = prepare_text(
+
+    df_cleaned = prepare_text_gpu(
         df_jobopslag_raw=df_jobopslag_raw,
         model_gliner2=model_gliner2,
+        batch_size=256
     )
 
     logger.info("Exporting data")
     df_cleaned.write_parquet(path_output)
 
     logger.info("Diagnostics")
-    # logger.info(df_cleaned.group_by('label').len().to_pandas().plot(kind='hist', bins=100))
     logger.info(df_cleaned.group_by('erhvervsomraade_txt').len().sort(by='len'))
+    df_cleaned.group_by('label').len().to_pandas().plot(kind='hist', bins=100)
 
 
 if __name__ == "__main__":
@@ -146,3 +204,5 @@ if __name__ == "__main__":
         path_model_gliner2=Path("/data/projects/overvaag/ESHA/hf_models/gliner2-multi-v1"),
         path_output=Path("/data/projects/overvaag/ESHA/mlops_course/MLOps_G24/data/raw/training_jobopslag.parquet"),
     )
+
+# %%
