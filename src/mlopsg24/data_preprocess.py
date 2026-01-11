@@ -6,6 +6,8 @@ import torch
 from sentence_transformers import SentenceTransformer
 import polars as pl
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+import numpy as np
 
 
 class PreprocessData():
@@ -14,27 +16,29 @@ class PreprocessData():
         self,
         path_text_embedder: Path = Path("models/intfloat/multilingual-e5-large-instruct"),
         file_data_raw: Path = Path("data/raw/training_jobopslag.parquet"),
-        do_split: bool = True,
         test_size: float = 0.2,
         val_size: float = 0.1,
         random_state: int = 42,
+        batch_size:int=32,
         output_dir: Path = Path("data/processed"),
-        target_class:str= "erhvervsomraade_txt",
+        column_target_class:str= "erhvervsomraade_txt",
+        column_text:str= "annonce_tekst",
         embedding_prefix:str=(
-            "Classify the following extracted texts of occupation, skills"
+            "Classify the following extracted texts of occupation, skills "
             "and tasks from a Danish job vacancy into job category"
         ),
     ) -> None:
 
         self.path_text_embedder = path_text_embedder
         self.file_data_raw = file_data_raw
-        self.do_split = do_split
         self.test_size = test_size
         self.val_size = val_size
         self.random_state = random_state
         self.output_dir = output_dir
-        self.target_class = target_class
+        self.column_target_class = column_target_class
+        self.column_text = column_text
         self.embedding_prefix = embedding_prefix
+        self.batch_size = batch_size
 
 
     def extract_input_data(self) -> None:
@@ -60,23 +64,52 @@ class PreprocessData():
     def create_x_features(self):
         """
         Create text embeddings used as x features.
+        Processes in batches to manage GPU memory efficiently.
         """
 
         list_sentences = (
             self.df_jobopslag
-            .select("ann_id")
+            .select(self.column_text)
             .to_series()
             .to_list()
         )
 
-        logger.info(f"Creating embeddings for {len(list_sentences)} observations")
+        logger.info(f"Creating embeddings for {len(list_sentences)} observations in batches of {self.batch_size}")
 
-        self.x_features = self.text_embedder.encode(
-            sentences=list_sentences,
-            convert_to_tensor=True,
-            show_progress_bar=True,
-            prompt=self.embedding_prefix
-        )
+        # Initialize list to store embeddings from each batch
+        all_embeddings = []
+
+        # Calculate number of batches
+        num_batches = (len(list_sentences) + self.batch_size - 1) // self.batch_size
+
+        # Process in batches with progress bar
+        for i in tqdm(range(0, len(list_sentences), self.batch_size),
+                      desc="Creating embeddings",
+                      total=num_batches):
+
+            # Get current batch
+            batch_sentences = list_sentences[i:i + self.batch_size]
+
+            # Generate embeddings for batch
+            batch_embeddings = self.text_embedder.encode(
+                sentences=batch_sentences,
+                convert_to_tensor=True,
+                show_progress_bar=False,  # Disable inner progress bar
+                prompt=self.embedding_prefix,
+                normalize_embeddings=True,
+            )
+
+            # Move to CPU and convert to numpy to free GPU memory
+            batch_embeddings_cpu = batch_embeddings.cpu().numpy()
+            all_embeddings.append(batch_embeddings_cpu)
+
+            # Clear GPU cache
+            if torch.cuda.is_available():
+                del batch_embeddings
+                torch.cuda.empty_cache()
+
+        # Concatenate all batches and convert back to tensor
+        self.x_features = torch.from_numpy(np.vstack(all_embeddings))
 
         logger.info(f"x features embeddings shape: {self.x_features.shape}")
 
@@ -87,7 +120,11 @@ class PreprocessData():
         Saves mapping of y idx to classes to parquet table
         """
 
-        y_categories = self.df_jobopslag.select(self.target_class).to_series()
+        y_categories = (
+            self.df_jobopslag
+            .select(self.column_target_class)
+            .to_series()
+        )
 
         # Create mapping from categories to indices
         unique_categories = y_categories.unique().sort()
