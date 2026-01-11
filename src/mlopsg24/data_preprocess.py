@@ -24,6 +24,7 @@ class PreprocessData():
         column_target_class:str= "erhvervsomraade_txt",
         column_text:str= "annonce_tekst",
         embedding_prefix:str=(
+            "query: "
             "Classify the following extracted texts of occupation, skills "
             "and tasks from a Danish job vacancy into job category"
         ),
@@ -212,6 +213,6 @@ class PreprocessData():
 
 if __name__ == "__main__":
     # Run preprocessing
-    PreprocessData().main()
+    PreprocessData(batch_size=256).main()
 
 # %%

@@ -9,199 +9,69 @@ from gliner2 import GLiNER2
 from pathlib import Path
 from loguru import logger
 from tqdm import tqdm
-
-import os
-import html
 import torch
-import gc
-from concurrent.futures import ProcessPoolExecutor
-
+import html
 
 #Internal package, not publicly avaiable
 from bmdb import db_uri
 
-# os.environ["POLARS_MAX_THREADS"] = "25"
 
-# def entities_to_natural_language(
-#     jobopslag_text:str,
-#     model_gliner2:GLiNER2
-# ) -> str:
-#     """
-#     Expects jobopslag in Danish.
-#     1) Does NER for ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
-#     on danish jobopslag. This outputs a dict.
-#     2) Rewrites the dict into a text more like natural language,
-#     which fits better to a sentencetransformer text embedding model eg. E5
-#     Removes Personal Data information
-#     """
+def prepare_text(
+    df_jobopslag_raw:pl.DataFrame,
+    model_gliner2:GLiNER2,
+) -> pl.DataFrame:
 
-#     entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
+    # Non batched version as prototype. Later Vibecode refactored into batched version
+    def entities_to_natural_language(
+        jobopslag_text:str,
+        model_gliner2:GLiNER2
+    ) -> str:
 
-#     dict_extracted = model_gliner2.extract_entities(
-#         text = jobopslag_text,
-#         entity_types = entities,
-#     )
+        entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
 
-#     str_natural_language = (
-#         f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} ."
-#         f"{', '.join(dict_extracted['entities']['kompetencer'])}, "
-#         f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} "
-#     )
+        dict_extracted = model_gliner2.extract_entities(
+            text = jobopslag_text,
+            entity_types = entities,
+        )
 
-#     return str_natural_language
+        str_natural_language = (
+            f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} ."
+            f"{', '.join(dict_extracted['entities']['kompetencer'])}, "
+            f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} "
+        )
 
-# def prepare_text(
-#     df_jobopslag_raw:pl.DataFrame,
-#     model_gliner2:GLiNER2,
-# ) -> pl.DataFrame:
-#     """
-#     - Replaces jobopslag ID with UUID to make the data even more anonymous
-#     - Cleans jobopslag text to just the parts of the text expected to be
-#     good signal for stillingsbetegnelse drop nulls just to make it easier
-#     to work with in the course
-#     """
-
-#     return (
-
-#         df_jobopslag_raw
-
-#         .with_columns(
-#             pl.col('ann_id').map_elements(
-#                 lambda row: str(uuid.uuid4()),
-#                 return_dtype=pl.String
-#             )
-#         )
-
-#         .with_columns(
-#             pl.col('annonce_tekst').map_elements(
-#                 lambda text: entities_to_natural_language(
-#                     jobopslag_text=text,
-#                     model_gliner2=model_gliner2
-#                 ),
-#                 return_dtype=pl.String
-#             )
-#         )
-
-#         .drop_nulls()
-
-#         .filter(
-#             pl.col('annonce_tekst').str.len_chars() >= 10
-#         )
-#     )
-
-# def prepare_text_gpu(df_jobopslag_raw: pl.DataFrame, model_gliner2: GLiNER2, batch_size: int = 32) -> pl.DataFrame:
-
-#     # 1. Fast UUID generation
-#     uuids = [str(uuid.uuid4()) for _ in range(df_jobopslag_raw.height)]
-
-#     # 2. Extract texts to process
-#     all_texts = df_jobopslag_raw["annonce_tekst"].to_list()
-#     results = []
-#     entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
+        return str_natural_language
 
 
-#     # Inference
-#     batch_output = model_gliner2.batch_extract_entities(
-#         all_texts,
-#         entities,
-#         batch_size=batch_size
-#     )
+    df_results = (
 
-#     # 4. Process each item individually to maintain list length
-#     for idx, dict_extracted in enumerate(batch_output):
-#         try:
-#             dict_extracted['entities']['stillingsbetegnelser']
-#             str_stil = f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} . "
-#         except:
-#             str_stil =''
-#         try:
-#             dict_extracted['entities']['kompetencer']
-#             str_komp = f"{', '.join(dict_extracted['entities']['kompetencer'])} . "
-#         except:
-#             str_komp =''
-#         try:
-#             dict_extracted['entities']['arbejdsopgaver']
-#             str_opg = f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} . "
-#         except:
-#             str_opg =''
+        df_jobopslag_raw
 
-#         try:
-#             str_nl = str_stil+str_komp+str_opg
-#             # str_nl = (
-#             #     f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} . "
-#             #     f"{', '.join(dict_extracted['entities']['kompetencer'])}, "
-#             #     f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} "
-#             # )
-#             results.append(str_nl)
-#         except Exception as e:
-#             logger.error(f"FAILED extraction at row {i + idx}: {e}")
-#             results.append(None)
+        .with_columns(
+            pl.col('ann_id').map_elements(
+                lambda row: str(uuid.uuid4()),
+                return_dtype=pl.String
+            )
+        )
 
-#     # 5. Add columns and then drop the rows where results were None
-#     return df_jobopslag_raw.with_columns([
-#         pl.Series("ann_id", uuids),
-#         pl.Series("annonce_tekst", results)
-#     ]).drop_nulls(subset=["annonce_tekst"])
+        .with_columns(
+            pl.col('annonce_tekst').map_elements(
+                lambda text: entities_to_natural_language(
+                    jobopslag_text=text,
+                    model_gliner2=model_gliner2
+                ),
+                return_dtype=pl.String
+            )
+        )
 
+        .drop_nulls()
 
+        .filter(
+            pl.col('annonce_tekst').str.len_chars() >= 10
+        )
+    )
 
-
-# def prepare_text_gpu_tqdm(
-#     df_jobopslag_raw: pl.DataFrame,
-#     model_gliner2: GLiNER2,
-#     batch_size: int = 16,
-# ) -> pl.DataFrame:
-
-
-#     uuids = [str(uuid.uuid4()) for _ in range(df_jobopslag_raw.height)]
-#     all_texts = df_jobopslag_raw["annonce_tekst"].to_list()
-#     results = []
-#     entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
-
-#     # Use tqdm on the range to track progress by batch
-#     for i in tqdm(range(0, len(all_texts), batch_size), desc="Processing Batches"):
-#         batch_texts = all_texts[i : i + batch_size]
-
-#         # Inference for the current batch
-#         batch_output = model_gliner2.batch_extract_entities(
-#             batch_texts,
-#             entities,
-#             batch_size=batch_size # Internal batching redundant here but safe
-#         )
-
-#         for dict_extracted in batch_output:
-#             try:
-#                 ent = dict_extracted.get('entities', {})
-#                 str_stil = f"{', '.join(ent.get('stillingsbetegnelser', []))} . "
-#                 str_komp = f"{', '.join(ent.get('kompetencer', []))} . "
-#                 str_opg = f"{', '.join(ent.get('arbejdsopgaver', []))} . "
-
-#                 results.append(str_stil + str_komp + str_opg)
-#             except Exception as e:
-#                 logger.error(f"FAILED extraction at row {i}: {e}")
-#                 results.append(None)
-
-#         # Aggressive cleanup
-#         del batch_output
-#         torch.cuda.empty_cache()
-#         gc.collect()
-
-
-#     return (
-#         df_jobopslag_raw
-#         .with_columns([
-#             pl.Series("ann_id", uuids),
-#             pl.Series("annonce_tekst", results)
-#         ])
-#         .drop_nulls()
-#         .filter(
-#             pl.col('annonce_tekst').str.len_chars() > 10
-#         )
-#         .with_columns(
-#             pl.col("annonce_tekst")
-#             .map_elements(lambda x: html.unescape(x) if x else x, return_dtype=pl.String)
-#         )
-#     )
+    return df_results
 
 
 def prepare_text_bactched(
@@ -211,27 +81,24 @@ def prepare_text_bactched(
 ) -> pl.DataFrame:
 
     """
-    1) Replaces jobopslag ID with UUID to make the data even more anonymous
-    2) GLiNER2 cleans jobopslag text to just the parts of the text expected to be
+    1) GLiNER2 cleans jobopslag text to just the parts of the text expected to be
     good signal for stillingsbetegnelse drop nulls just to make it easier
     to work with in the course. It also removes Personal Data information.
     Expects jobopslag in Danish. Does NER for ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
     on Danish jobopslag. This outputs a dict.
-    3) Rewrites the GLINER2 dict into a text more like natural language,
+    2) Rewrites the GLINER2 dict into a text more like natural language,
     which fits better to a sentencetransformer text embedding model eg. E5
+    3) Replaces jobopslag ID with UUID to make the data even more anonymous
     4) Drops nulls rows, unescape html and filter short strings
     for cleaner data to training of model.
     """
 
-    # 1. UUID generation
-    uuids = [str(uuid.uuid4()) for _ in range(df_jobopslag_raw.height)]
-
-    # 2. Extract texts to process
+    # 1. Extract texts to process
     all_texts = df_jobopslag_raw["annonce_tekst"].to_list()
     results = []
     entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
 
-    # 2. Batch processing loop of GLiNER2
+    # 1. Batch processing loop of GLiNER2
     for i in tqdm(range(0, len(all_texts), batch_size), desc="Processing Batches"):
         batch = all_texts[i : i + batch_size]
 
@@ -240,7 +107,7 @@ def prepare_text_bactched(
 
         for dict_extracted in batch_output:
             try:
-                # 3. rewrite
+                # 2. rewrite
                 ent = dict_extracted.get('entities', {})
                 str_stil = f"{', '.join(ent.get('stillingsbetegnelser', []))}. "
                 str_komp = f"{', '.join(ent.get('kompetencer', []))}. "
@@ -251,17 +118,24 @@ def prepare_text_bactched(
                 logger.error(f"FAILED extraction at row {i}: {e}")
                 results.append(None)
 
-    df_text_result = (
+    # 3. UUID generation
+    uuids = [str(uuid.uuid4()) for _ in range(df_jobopslag_raw.height)]
+
+
+    df_cleaned_final = (
+
         df_jobopslag_raw
+
         .with_columns([
+
+            # 3. UUIDs
             pl.Series("ann_id", uuids),
+
+            # Add rewritten text
             pl.Series("annonce_tekst", results)
         ])
-    )
 
-    # 4. final clean
-    df_cleaned_final = (
-        df_text_result
+        # 4. final clean
         .drop_nulls()
         .filter(
             pl.col('annonce_tekst').str.len_chars() > 10
