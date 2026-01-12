@@ -1,0 +1,30 @@
+name: ruff codestyle check
+
+on:
+  push:
+    branches:
+      - esben
+  pull_request:
+    branches:
+      - esben
+
+jobs:
+  ruff:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        python-version: ["3.12", "3.11"]
+
+    steps:
+      - name: Checkout to branch
+        uses: actions/checkout@v5
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          cache: "codestyle"
+
+      - name: Ruff check
+        run: uv run ruff check .
