@@ -94,3 +94,6 @@ def test_target_has_exactly_22_categories():
     )
 
     assert unique_count==22, "Data validation failed!"
+
+
+#test af branch esben
