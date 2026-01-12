@@ -1,0 +1,30 @@
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - esben
+  pull_request:
+    branches:
+      - esben
+
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Checkout to branch
+        uses: actions/checkout@v5
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          uv sync --dev --locked
+
+      - name: Test with pytest
+        run: |
+          uv run pytest
