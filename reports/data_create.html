@@ -7509,18 +7509,7 @@ a.anchor-link {
 </style>
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
-<main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Connected to .venv (Python 3.12.11)</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0b2c236c-27d3-427f-b53d-9bdb8ac62a1d">
+<main><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=41c0dada-5b2a-4ef2-81c8-1d1812e67be7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7533,59 +7522,42 @@ a.anchor-link {
 <span class="kn">from</span> <span class="nn">gliner2</span> <span class="kn">import</span> <span class="n">GLiNER2</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">html</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">gc</span>
-<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
-
+<span class="kn">import</span> <span class="nn">html</span>
 
 <span class="c1">#Internal package, not publicly avaiable</span>
 <span class="kn">from</span> <span class="nn">bmdb</span> <span class="kn">import</span> <span class="n">db_uri</span>
 
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"POLARS_MAX_THREADS"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"25"</span>
-
-<span class="k">def</span> <span class="nf">entities_to_natural_language</span><span class="p">(</span>
-    <span class="n">jobopslag_text</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
-    <span class="n">model_gliner2</span><span class="p">:</span><span class="n">GLiNER2</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Expects jobopslag in Danish.</span>
-<span class="sd">    1) Does NER for ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]</span>
-<span class="sd">    on danish jobopslag. This outputs a dict.</span>
-<span class="sd">    2) Rewrites the dict into a text more like natural language,</span>
-<span class="sd">    which fits better to a sentencetransformer text embedding model eg. E5</span>
-<span class="sd">    Removes Personal Data information</span>
-<span class="sd">    """</span>
-
-    <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
-
-    <span class="n">dict_extracted</span> <span class="o">=</span> <span class="n">model_gliner2</span><span class="o">.</span><span class="n">extract_entities</span><span class="p">(</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">jobopslag_text</span><span class="p">,</span>
-        <span class="n">entity_types</span> <span class="o">=</span> <span class="n">entities</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="n">str_natural_language</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">])</span><span class="si">}</span><span class="s2"> ."</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">])</span><span class="si">}</span><span class="s2">, "</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">])</span><span class="si">}</span><span class="s2"> "</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">str_natural_language</span>
 
 <span class="k">def</span> <span class="nf">prepare_text</span><span class="p">(</span>
     <span class="n">df_jobopslag_raw</span><span class="p">:</span><span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">model_gliner2</span><span class="p">:</span><span class="n">GLiNER2</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    - Replaces jobopslag ID with UUID to make the data even more anonymous</span>
-<span class="sd">    - Cleans jobopslag text to just the parts of the text expected to be</span>
-<span class="sd">    good signal for stillingsbetegnelse drop nulls just to make it easier</span>
-<span class="sd">    to work with in the course</span>
-<span class="sd">    """</span>
 
-    <span class="k">return</span> <span class="p">(</span>
+    <span class="c1"># Non batched version as prototype. Later Vibecode refactored into batched version</span>
+    <span class="k">def</span> <span class="nf">entities_to_natural_language</span><span class="p">(</span>
+        <span class="n">jobopslag_text</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">model_gliner2</span><span class="p">:</span><span class="n">GLiNER2</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
+
+        <span class="n">dict_extracted</span> <span class="o">=</span> <span class="n">model_gliner2</span><span class="o">.</span><span class="n">extract_entities</span><span class="p">(</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">jobopslag_text</span><span class="p">,</span>
+            <span class="n">entity_types</span> <span class="o">=</span> <span class="n">entities</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">str_natural_language</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">])</span><span class="si">}</span><span class="s2"> ."</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">])</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">])</span><span class="si">}</span><span class="s2"> "</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">str_natural_language</span>
+
+
+    <span class="n">df_results</span> <span class="o">=</span> <span class="p">(</span>
 
         <span class="n">df_jobopslag_raw</span>
 
@@ -7613,161 +7585,71 @@ a.anchor-link {
         <span class="p">)</span>
     <span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">prepare_text_gpu</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_gliner2</span><span class="p">:</span> <span class="n">GLiNER2</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="c1"># 1. Fast UUID generation</span>
-    <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">df_results</span>
 
-    <span class="c1"># 2. Extract texts to process</span>
+
+<span class="k">def</span> <span class="nf">prepare_text_bactched</span><span class="p">(</span>
+    <span class="n">df_jobopslag_raw</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">model_gliner2</span><span class="p">:</span> <span class="n">GLiNER2</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    1) GLiNER2 cleans jobopslag text to just the parts of the text expected to be</span>
+<span class="sd">    good signal for stillingsbetegnelse drop nulls just to make it easier</span>
+<span class="sd">    to work with in the course. It also removes Personal Data information.</span>
+<span class="sd">    Expects jobopslag in Danish. Does NER for ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]</span>
+<span class="sd">    on Danish jobopslag. This outputs a dict.</span>
+<span class="sd">    2) Rewrites the GLINER2 dict into a text more like natural language,</span>
+<span class="sd">    which fits better to a sentencetransformer text embedding model eg. E5</span>
+<span class="sd">    3) Replaces jobopslag ID with UUID to make the data even more anonymous</span>
+<span class="sd">    4) Drops nulls rows, unescape html and filter short strings</span>
+<span class="sd">    for cleaner data to training of model.</span>
+<span class="sd">    """</span>
+
+    <span class="c1"># 1. Extract texts to process</span>
     <span class="n">all_texts</span> <span class="o">=</span> <span class="n">df_jobopslag_raw</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
     <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
 
-
-    <span class="c1"># Inference</span>
-    <span class="n">batch_output</span> <span class="o">=</span> <span class="n">model_gliner2</span><span class="o">.</span><span class="n">batch_extract_entities</span><span class="p">(</span>
-        <span class="n">all_texts</span><span class="p">,</span>
-        <span class="n">entities</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span>
-    <span class="p">)</span>
-
-    <span class="c1"># 4. Process each item individually to maintain list length</span>
-    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dict_extracted</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">batch_output</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">]</span>
-            <span class="n">str_stil</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">str_stil</span> <span class="o">=</span><span class="s1">''</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">]</span>
-            <span class="n">str_komp</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">str_komp</span> <span class="o">=</span><span class="s1">''</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">]</span>
-            <span class="n">str_opg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">str_opg</span> <span class="o">=</span><span class="s1">''</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">str_nl</span> <span class="o">=</span> <span class="n">str_stil</span><span class="o">+</span><span class="n">str_komp</span><span class="o">+</span><span class="n">str_opg</span>
-            <span class="c1"># str_nl = (</span>
-            <span class="c1">#     f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} . "</span>
-            <span class="c1">#     f"{', '.join(dict_extracted['entities']['kompetencer'])}, "</span>
-            <span class="c1">#     f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} "</span>
-            <span class="c1"># )</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_nl</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"FAILED extraction at row </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-
-    <span class="c1"># 5. Add columns and then drop the rows where results were None</span>
-    <span class="k">return</span> <span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">with_columns</span><span class="p">([</span>
-        <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"ann_id"</span><span class="p">,</span> <span class="n">uuids</span><span class="p">),</span>
-        <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"annonce_tekst"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
-    <span class="p">])</span><span class="o">.</span><span class="n">drop_nulls</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">])</span>
-
-<span class="k">def</span> <span class="nf">prepare_text_gpu_tqdm_2</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_gliner2</span><span class="p">:</span> <span class="n">GLiNER2</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="c1"># 1. Fast UUID generation</span>
-    <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
-
-    <span class="c1"># 2. Extract texts to process</span>
-    <span class="n">all_texts</span> <span class="o">=</span> <span class="n">df_jobopslag_raw</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
-
-    <span class="c1"># 3. Batch processing loop</span>
+    <span class="c1"># 1. Batch processing loop of GLiNER2</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_texts</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Processing Batches"</span><span class="p">):</span>
-    <span class="c1"># for i in range(0, len(all_texts), batch_size):</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="n">all_texts</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
 
         <span class="c1"># Inference</span>
         <span class="n">batch_output</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_gliner2</span><span class="o">.</span><span class="n">extract_entities</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">entities</span><span class="p">)</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">]</span>
 
-        <span class="c1"># 4. Process each item individually to maintain list length</span>
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dict_extracted</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">batch_output</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">]</span>
-                <span class="n">str_stil</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">str_stil</span> <span class="o">=</span><span class="s1">''</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">]</span>
-                <span class="n">str_komp</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">str_komp</span> <span class="o">=</span><span class="s1">''</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">]</span>
-                <span class="n">str_opg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">str_opg</span> <span class="o">=</span><span class="s1">''</span>
-
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">str_nl</span> <span class="o">=</span> <span class="n">str_stil</span><span class="o">+</span><span class="n">str_komp</span><span class="o">+</span><span class="n">str_opg</span>
-                <span class="c1"># str_nl = (</span>
-                <span class="c1">#     f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} . "</span>
-                <span class="c1">#     f"{', '.join(dict_extracted['entities']['kompetencer'])}, "</span>
-                <span class="c1">#     f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} "</span>
-                <span class="c1"># )</span>
-                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_nl</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"FAILED extraction at row </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-
-    <span class="c1"># 5. Add columns and then drop the rows where results were None</span>
-    <span class="k">return</span> <span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">with_columns</span><span class="p">([</span>
-        <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"ann_id"</span><span class="p">,</span> <span class="n">uuids</span><span class="p">),</span>
-        <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"annonce_tekst"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
-    <span class="p">])</span><span class="o">.</span><span class="n">drop_nulls</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">])</span>
-
-
-
-
-<span class="k">def</span> <span class="nf">prepare_text_gpu_tqdm</span><span class="p">(</span>
-    <span class="n">df_jobopslag_raw</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">model_gliner2</span><span class="p">:</span> <span class="n">GLiNER2</span><span class="p">,</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-
-    <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
-    <span class="n">all_texts</span> <span class="o">=</span> <span class="n">df_jobopslag_raw</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
-
-    <span class="c1"># Use tqdm on the range to track progress by batch</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_texts</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Processing Batches"</span><span class="p">):</span>
-        <span class="n">batch_texts</span> <span class="o">=</span> <span class="n">all_texts</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
-
-        <span class="c1"># Inference for the current batch</span>
-        <span class="n">batch_output</span> <span class="o">=</span> <span class="n">model_gliner2</span><span class="o">.</span><span class="n">batch_extract_entities</span><span class="p">(</span>
-            <span class="n">batch_texts</span><span class="p">,</span>
-            <span class="n">entities</span><span class="p">,</span>
-            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span> <span class="c1"># Internal batching redundant here but safe</span>
-        <span class="p">)</span>
-
         <span class="k">for</span> <span class="n">dict_extracted</span> <span class="ow">in</span> <span class="n">batch_output</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># 2. rewrite</span>
                 <span class="n">ent</span> <span class="o">=</span> <span class="n">dict_extracted</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'entities'</span><span class="p">,</span> <span class="p">{})</span>
-                <span class="n">str_stil</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'stillingsbetegnelser'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
-                <span class="n">str_komp</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'kompetencer'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
-                <span class="n">str_opg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'arbejdsopgaver'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
+                <span class="n">str_stil</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'stillingsbetegnelser'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">. "</span>
+                <span class="n">str_komp</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'kompetencer'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">. "</span>
+                <span class="n">str_opg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'arbejdsopgaver'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">. "</span>
 
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_stil</span> <span class="o">+</span> <span class="n">str_komp</span> <span class="o">+</span> <span class="n">str_opg</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"FAILED extraction at row </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
-        <span class="c1"># Aggressive cleanup</span>
-        <span class="k">del</span> <span class="n">batch_output</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
-        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+    <span class="c1"># 3. UUID generation</span>
+    <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
 
 
-    <span class="k">return</span> <span class="p">(</span>
+    <span class="n">df_cleaned_final</span> <span class="o">=</span> <span class="p">(</span>
+
         <span class="n">df_jobopslag_raw</span>
+
         <span class="o">.</span><span class="n">with_columns</span><span class="p">([</span>
+
+            <span class="c1"># 3. UUIDs</span>
             <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"ann_id"</span><span class="p">,</span> <span class="n">uuids</span><span class="p">),</span>
+
+            <span class="c1"># Add rewritten text</span>
             <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"annonce_tekst"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
         <span class="p">])</span>
+
+        <span class="c1"># 4. final clean</span>
         <span class="o">.</span><span class="n">drop_nulls</span><span class="p">()</span>
         <span class="o">.</span><span class="n">filter</span><span class="p">(</span>
             <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">'annonce_tekst'</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">len_chars</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">10</span>
@@ -7779,9 +7661,14 @@ a.anchor-link {
     <span class="p">)</span>
 
 
+    <span class="k">return</span> <span class="n">df_cleaned_final</span>
+
+
+
 <span class="k">def</span> <span class="nf">pipeline_data_create</span><span class="p">(</span>
     <span class="n">path_model_gliner2</span><span class="p">:</span><span class="n">Path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"models/fastino/gliner2-multi-v1"</span><span class="p">),</span>
     <span class="n">path_output</span><span class="p">:</span><span class="n">Path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"data/raw/training_jobopslag.parquet"</span><span class="p">),</span>
+    <span class="n">subset_size</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    1. Extract data from private database</span>
@@ -7793,7 +7680,7 @@ a.anchor-link {
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Extracting data"</span><span class="p">)</span>
     <span class="n">df_jobopslag_raw</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_database_uri</span><span class="p">(</span>
-        <span class="n">query</span><span class="o">=</span><span class="s2">"""--sql</span>
+        <span class="n">query</span><span class="o">=</span><span class="sa">f</span><span class="s2">"""--sql</span>
 <span class="s2">            SELECT</span>
 <span class="s2">                a.ann_id::INT,</span>
 <span class="s2">                a.startdt,</span>
@@ -7818,19 +7705,20 @@ a.anchor-link {
 <span class="s2">                ) AS c ON a.concepturida = c.uri_key</span>
 <span class="s2">            WHERE DATE_PART('year',a.startdt) BETWEEN 2022 AND 2024 -- NOTE:years with clean data</span>
 
-<span class="s2">            LIMIT 100000 --DEV</span>
+<span class="s2">            LIMIT </span><span class="si">{</span><span class="n">subset_size</span><span class="si">}</span>
 <span class="s2">        """</span><span class="p">,</span>
         <span class="n">uri</span><span class="o">=</span><span class="n">db_uri</span><span class="p">()</span>
     <span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Loading hf model"</span><span class="p">)</span>
     <span class="n">model_gliner2</span> <span class="o">=</span> <span class="n">GLiNER2</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">path_model_gliner2</span><span class="p">)</span>
-    <span class="n">model_gliner2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"cuda"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+        <span class="n">model_gliner2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"cuda"</span><span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Transforming data"</span><span class="p">)</span>
 
-    <span class="c1"># df_cleaned = prepare_text_gpu(</span>
-    <span class="n">df_cleaned</span> <span class="o">=</span> <span class="n">prepare_text_gpu_tqdm_2</span><span class="p">(</span>
+    <span class="n">df_cleaned</span> <span class="o">=</span> <span class="n">prepare_text_bactched</span><span class="p">(</span><span class="err">½</span>
         <span class="n">df_jobopslag_raw</span><span class="o">=</span><span class="n">df_jobopslag_raw</span><span class="p">,</span>
         <span class="n">model_gliner2</span><span class="o">=</span><span class="n">model_gliner2</span><span class="p">,</span>
     <span class="p">)</span>
@@ -7845,11 +7733,10 @@ a.anchor-link {
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 
-    <span class="c1"># pipeline_data_create()</span>
-
     <span class="n">pipeline_data_create</span><span class="p">(</span>
         <span class="n">path_model_gliner2</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"/data/projects/overvaag/ESHA/hf_models/gliner2-multi-v1"</span><span class="p">),</span>
         <span class="n">path_output</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"/data/projects/overvaag/ESHA/mlops_course/MLOps_G24/data/raw/training_jobopslag.parquet"</span><span class="p">),</span>
+        <span class="c1"># subset_size=100000,</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -7863,48 +7750,17 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/data/projects/overvaag/ESHA/mlops_course/misc/misc_venv/.venv/lib64/python3.12/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
-  from .autonotebook import tqdm as notebook_tqdm
-<span class="ansi-green-fg">2026-01-11 08:21:40.613</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">263</span> - <span class="ansi-bold">START pipeline_data_create()</span>
-<span class="ansi-green-fg">2026-01-11 08:21:40.614</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">265</span> - <span class="ansi-bold">Extracting data</span>
-<span class="ansi-green-fg">2026-01-11 08:21:42.600</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">297</span> - <span class="ansi-bold">Loading hf model</span>
+<pre>
+  <span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[1]</span><span class="ansi-green-fg">, line 203</span>
+<span class="ansi-red-fg">    </span><span class="ansi-red-fg">df_cleaned = prepare_text_bactched(½</span>
+                                       ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> invalid character '½' (U+00BD)
 </pre>
 </div>
 </div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>============================================================
-🧠 Model Configuration
-============================================================
-Encoder model      : microsoft/mdeberta-v3-base
-Counting layer     : count_lstm
-Token pooling      : first
-============================================================
-</pre>
 </div>
 </div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre><span class="ansi-green-fg">2026-01-11 08:21:47.318</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">301</span> - <span class="ansi-bold">Transforming data</span>
-Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Restarted .venv (Python 3.12.11)</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f421c31e-d54d-4be2-ac60-42a33c49c314">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=af4b4389-96f8-4308-b5d0-24490158a322">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7917,59 +7773,42 @@ Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pr
 <span class="kn">from</span> <span class="nn">gliner2</span> <span class="kn">import</span> <span class="n">GLiNER2</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">import</span> <span class="nn">html</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">gc</span>
-<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
-
+<span class="kn">import</span> <span class="nn">html</span>
 
 <span class="c1">#Internal package, not publicly avaiable</span>
 <span class="kn">from</span> <span class="nn">bmdb</span> <span class="kn">import</span> <span class="n">db_uri</span>
 
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"POLARS_MAX_THREADS"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"25"</span>
-
-<span class="k">def</span> <span class="nf">entities_to_natural_language</span><span class="p">(</span>
-    <span class="n">jobopslag_text</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
-    <span class="n">model_gliner2</span><span class="p">:</span><span class="n">GLiNER2</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Expects jobopslag in Danish.</span>
-<span class="sd">    1) Does NER for ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]</span>
-<span class="sd">    on danish jobopslag. This outputs a dict.</span>
-<span class="sd">    2) Rewrites the dict into a text more like natural language,</span>
-<span class="sd">    which fits better to a sentencetransformer text embedding model eg. E5</span>
-<span class="sd">    Removes Personal Data information</span>
-<span class="sd">    """</span>
-
-    <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
-
-    <span class="n">dict_extracted</span> <span class="o">=</span> <span class="n">model_gliner2</span><span class="o">.</span><span class="n">extract_entities</span><span class="p">(</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">jobopslag_text</span><span class="p">,</span>
-        <span class="n">entity_types</span> <span class="o">=</span> <span class="n">entities</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="n">str_natural_language</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">])</span><span class="si">}</span><span class="s2"> ."</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">])</span><span class="si">}</span><span class="s2">, "</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">])</span><span class="si">}</span><span class="s2"> "</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">str_natural_language</span>
 
 <span class="k">def</span> <span class="nf">prepare_text</span><span class="p">(</span>
     <span class="n">df_jobopslag_raw</span><span class="p">:</span><span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">model_gliner2</span><span class="p">:</span><span class="n">GLiNER2</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    - Replaces jobopslag ID with UUID to make the data even more anonymous</span>
-<span class="sd">    - Cleans jobopslag text to just the parts of the text expected to be</span>
-<span class="sd">    good signal for stillingsbetegnelse drop nulls just to make it easier</span>
-<span class="sd">    to work with in the course</span>
-<span class="sd">    """</span>
 
-    <span class="k">return</span> <span class="p">(</span>
+    <span class="c1"># Non batched version as prototype. Later Vibecode refactored into batched version</span>
+    <span class="k">def</span> <span class="nf">entities_to_natural_language</span><span class="p">(</span>
+        <span class="n">jobopslag_text</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">model_gliner2</span><span class="p">:</span><span class="n">GLiNER2</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+        <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
+
+        <span class="n">dict_extracted</span> <span class="o">=</span> <span class="n">model_gliner2</span><span class="o">.</span><span class="n">extract_entities</span><span class="p">(</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">jobopslag_text</span><span class="p">,</span>
+            <span class="n">entity_types</span> <span class="o">=</span> <span class="n">entities</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">str_natural_language</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">])</span><span class="si">}</span><span class="s2"> ."</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">])</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">])</span><span class="si">}</span><span class="s2"> "</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">str_natural_language</span>
+
+
+    <span class="n">df_results</span> <span class="o">=</span> <span class="p">(</span>
 
         <span class="n">df_jobopslag_raw</span>
 
@@ -7997,71 +7836,35 @@ Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pr
         <span class="p">)</span>
     <span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">prepare_text_gpu</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_gliner2</span><span class="p">:</span> <span class="n">GLiNER2</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="c1"># 1. Fast UUID generation</span>
-    <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">df_results</span>
 
-    <span class="c1"># 2. Extract texts to process</span>
+
+<span class="k">def</span> <span class="nf">prepare_text_bactched</span><span class="p">(</span>
+    <span class="n">df_jobopslag_raw</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">model_gliner2</span><span class="p">:</span> <span class="n">GLiNER2</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    1) GLiNER2 cleans jobopslag text to just the parts of the text expected to be</span>
+<span class="sd">    good signal for stillingsbetegnelse drop nulls just to make it easier</span>
+<span class="sd">    to work with in the course. It also removes Personal Data information.</span>
+<span class="sd">    Expects jobopslag in Danish. Does NER for ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]</span>
+<span class="sd">    on Danish jobopslag. This outputs a dict.</span>
+<span class="sd">    2) Rewrites the GLINER2 dict into a text more like natural language,</span>
+<span class="sd">    which fits better to a sentencetransformer text embedding model eg. E5</span>
+<span class="sd">    3) Replaces jobopslag ID with UUID to make the data even more anonymous</span>
+<span class="sd">    4) Drops nulls rows, unescape html and filter short strings</span>
+<span class="sd">    for cleaner data to training of model.</span>
+<span class="sd">    """</span>
+
+    <span class="c1"># 1. Extract texts to process</span>
     <span class="n">all_texts</span> <span class="o">=</span> <span class="n">df_jobopslag_raw</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
     <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
 
-
-    <span class="c1"># Inference</span>
-    <span class="n">batch_output</span> <span class="o">=</span> <span class="n">model_gliner2</span><span class="o">.</span><span class="n">batch_extract_entities</span><span class="p">(</span>
-        <span class="n">all_texts</span><span class="p">,</span>
-        <span class="n">entities</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span>
-    <span class="p">)</span>
-
-    <span class="c1"># 4. Process each item individually to maintain list length</span>
-    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dict_extracted</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">batch_output</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">]</span>
-            <span class="n">str_stil</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'stillingsbetegnelser'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">str_stil</span> <span class="o">=</span><span class="s1">''</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">]</span>
-            <span class="n">str_komp</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'kompetencer'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">str_komp</span> <span class="o">=</span><span class="s1">''</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">]</span>
-            <span class="n">str_opg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_extracted</span><span class="p">[</span><span class="s1">'entities'</span><span class="p">][</span><span class="s1">'arbejdsopgaver'</span><span class="p">])</span><span class="si">}</span><span class="s2"> . "</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">str_opg</span> <span class="o">=</span><span class="s1">''</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">str_nl</span> <span class="o">=</span> <span class="n">str_stil</span><span class="o">+</span><span class="n">str_komp</span><span class="o">+</span><span class="n">str_opg</span>
-            <span class="c1"># str_nl = (</span>
-            <span class="c1">#     f"{', '.join(dict_extracted['entities']['stillingsbetegnelser'])} . "</span>
-            <span class="c1">#     f"{', '.join(dict_extracted['entities']['kompetencer'])}, "</span>
-            <span class="c1">#     f"{', '.join(dict_extracted['entities']['arbejdsopgaver'])} "</span>
-            <span class="c1"># )</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_nl</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"FAILED extraction at row </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-
-    <span class="c1"># 5. Add columns and then drop the rows where results were None</span>
-    <span class="k">return</span> <span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">with_columns</span><span class="p">([</span>
-        <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"ann_id"</span><span class="p">,</span> <span class="n">uuids</span><span class="p">),</span>
-        <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"annonce_tekst"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
-    <span class="p">])</span><span class="o">.</span><span class="n">drop_nulls</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">])</span>
-
-<span class="k">def</span> <span class="nf">prepare_text_gpu_tqdm_2</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_gliner2</span><span class="p">:</span> <span class="n">GLiNER2</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="c1"># 1. Fast UUID generation</span>
-    <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
-
-    <span class="c1"># 2. Extract texts to process</span>
-    <span class="n">all_texts</span> <span class="o">=</span> <span class="n">df_jobopslag_raw</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
-
-    <span class="c1"># 3. Batch processing loop</span>
+    <span class="c1"># 1. Batch processing loop of GLiNER2</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_texts</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Processing Batches"</span><span class="p">):</span>
-    <span class="c1"># for i in range(0, len(all_texts), batch_size):</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="n">all_texts</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
 
         <span class="c1"># Inference</span>
@@ -8069,81 +7872,35 @@ Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pr
 
         <span class="k">for</span> <span class="n">dict_extracted</span> <span class="ow">in</span> <span class="n">batch_output</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># 2. rewrite</span>
                 <span class="n">ent</span> <span class="o">=</span> <span class="n">dict_extracted</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'entities'</span><span class="p">,</span> <span class="p">{})</span>
-                <span class="n">str_stil</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'stillingsbetegnelser'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
-                <span class="n">str_komp</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'kompetencer'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
-                <span class="n">str_opg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'arbejdsopgaver'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
+                <span class="n">str_stil</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'stillingsbetegnelser'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">. "</span>
+                <span class="n">str_komp</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'kompetencer'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">. "</span>
+                <span class="n">str_opg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'arbejdsopgaver'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2">. "</span>
 
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_stil</span> <span class="o">+</span> <span class="n">str_komp</span> <span class="o">+</span> <span class="n">str_opg</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"FAILED extraction at row </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="n">df_jobopslag_raw</span>
-        <span class="o">.</span><span class="n">with_columns</span><span class="p">([</span>
-            <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"ann_id"</span><span class="p">,</span> <span class="n">uuids</span><span class="p">),</span>
-            <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"annonce_tekst"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
-        <span class="p">])</span>
-        <span class="o">.</span><span class="n">drop_nulls</span><span class="p">()</span>
-        <span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-            <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">'annonce_tekst'</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">len_chars</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">10</span>
-        <span class="p">)</span>
-        <span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
-            <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"annonce_tekst"</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">map_elements</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">html</span><span class="o">.</span><span class="n">unescape</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="n">x</span><span class="p">,</span> <span class="n">return_dtype</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">String</span><span class="p">)</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-
-
-
-
-<span class="k">def</span> <span class="nf">prepare_text_gpu_tqdm</span><span class="p">(</span>
-    <span class="n">df_jobopslag_raw</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">model_gliner2</span><span class="p">:</span> <span class="n">GLiNER2</span><span class="p">,</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-
+    <span class="c1"># 3. UUID generation</span>
     <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">df_jobopslag_raw</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
-    <span class="n">all_texts</span> <span class="o">=</span> <span class="n">df_jobopslag_raw</span><span class="p">[</span><span class="s2">"annonce_tekst"</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"stillingsbetegnelser"</span><span class="p">,</span> <span class="s2">"kompetencer"</span><span class="p">,</span> <span class="s2">"arbejdsopgaver"</span><span class="p">]</span>
-
-    <span class="c1"># Use tqdm on the range to track progress by batch</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_texts</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Processing Batches"</span><span class="p">):</span>
-        <span class="n">batch_texts</span> <span class="o">=</span> <span class="n">all_texts</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
-
-        <span class="c1"># Inference for the current batch</span>
-        <span class="n">batch_output</span> <span class="o">=</span> <span class="n">model_gliner2</span><span class="o">.</span><span class="n">batch_extract_entities</span><span class="p">(</span>
-            <span class="n">batch_texts</span><span class="p">,</span>
-            <span class="n">entities</span><span class="p">,</span>
-            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span> <span class="c1"># Internal batching redundant here but safe</span>
-        <span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">dict_extracted</span> <span class="ow">in</span> <span class="n">batch_output</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">ent</span> <span class="o">=</span> <span class="n">dict_extracted</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'entities'</span><span class="p">,</span> <span class="p">{})</span>
-                <span class="n">str_stil</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'stillingsbetegnelser'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
-                <span class="n">str_komp</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'kompetencer'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
-                <span class="n">str_opg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'arbejdsopgaver'</span><span class="p">,</span><span class="w"> </span><span class="p">[]))</span><span class="si">}</span><span class="s2"> . "</span>
-
-                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_stil</span> <span class="o">+</span> <span class="n">str_komp</span> <span class="o">+</span> <span class="n">str_opg</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"FAILED extraction at row </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-
-        <span class="c1"># Aggressive cleanup</span>
-        <span class="k">del</span> <span class="n">batch_output</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
-        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 
 
-    <span class="k">return</span> <span class="p">(</span>
+    <span class="n">df_cleaned_final</span> <span class="o">=</span> <span class="p">(</span>
+
         <span class="n">df_jobopslag_raw</span>
+
         <span class="o">.</span><span class="n">with_columns</span><span class="p">([</span>
+
+            <span class="c1"># 3. UUIDs</span>
             <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"ann_id"</span><span class="p">,</span> <span class="n">uuids</span><span class="p">),</span>
+
+            <span class="c1"># Add rewritten text</span>
             <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">"annonce_tekst"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
         <span class="p">])</span>
+
+        <span class="c1"># 4. final clean</span>
         <span class="o">.</span><span class="n">drop_nulls</span><span class="p">()</span>
         <span class="o">.</span><span class="n">filter</span><span class="p">(</span>
             <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s1">'annonce_tekst'</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">len_chars</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">10</span>
@@ -8153,11 +7910,16 @@ Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pr
             <span class="o">.</span><span class="n">map_elements</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">html</span><span class="o">.</span><span class="n">unescape</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="n">x</span><span class="p">,</span> <span class="n">return_dtype</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">String</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">df_cleaned_final</span>
+
 
 
 <span class="k">def</span> <span class="nf">pipeline_data_create</span><span class="p">(</span>
     <span class="n">path_model_gliner2</span><span class="p">:</span><span class="n">Path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"models/fastino/gliner2-multi-v1"</span><span class="p">),</span>
     <span class="n">path_output</span><span class="p">:</span><span class="n">Path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"data/raw/training_jobopslag.parquet"</span><span class="p">),</span>
+    <span class="n">subset_size</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    1. Extract data from private database</span>
@@ -8169,7 +7931,7 @@ Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pr
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Extracting data"</span><span class="p">)</span>
     <span class="n">df_jobopslag_raw</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_database_uri</span><span class="p">(</span>
-        <span class="n">query</span><span class="o">=</span><span class="s2">"""--sql</span>
+        <span class="n">query</span><span class="o">=</span><span class="sa">f</span><span class="s2">"""--sql</span>
 <span class="s2">            SELECT</span>
 <span class="s2">                a.ann_id::INT,</span>
 <span class="s2">                a.startdt,</span>
@@ -8194,19 +7956,20 @@ Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pr
 <span class="s2">                ) AS c ON a.concepturida = c.uri_key</span>
 <span class="s2">            WHERE DATE_PART('year',a.startdt) BETWEEN 2022 AND 2024 -- NOTE:years with clean data</span>
 
-<span class="s2">            LIMIT 100000 --DEV</span>
+<span class="s2">            LIMIT </span><span class="si">{</span><span class="n">subset_size</span><span class="si">}</span>
 <span class="s2">        """</span><span class="p">,</span>
         <span class="n">uri</span><span class="o">=</span><span class="n">db_uri</span><span class="p">()</span>
     <span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Loading hf model"</span><span class="p">)</span>
     <span class="n">model_gliner2</span> <span class="o">=</span> <span class="n">GLiNER2</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">path_model_gliner2</span><span class="p">)</span>
-    <span class="n">model_gliner2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"cuda"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+        <span class="n">model_gliner2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"cuda"</span><span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Transforming data"</span><span class="p">)</span>
 
-    <span class="c1"># df_cleaned = prepare_text_gpu(</span>
-    <span class="n">df_cleaned</span> <span class="o">=</span> <span class="n">prepare_text_gpu_tqdm_2</span><span class="p">(</span>
+    <span class="n">df_cleaned</span> <span class="o">=</span> <span class="n">prepare_text_bactched</span><span class="p">(</span>
         <span class="n">df_jobopslag_raw</span><span class="o">=</span><span class="n">df_jobopslag_raw</span><span class="p">,</span>
         <span class="n">model_gliner2</span><span class="o">=</span><span class="n">model_gliner2</span><span class="p">,</span>
     <span class="p">)</span>
@@ -8221,11 +7984,10 @@ Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pr
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 
-    <span class="c1"># pipeline_data_create()</span>
-
     <span class="n">pipeline_data_create</span><span class="p">(</span>
         <span class="n">path_model_gliner2</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"/data/projects/overvaag/ESHA/hf_models/gliner2-multi-v1"</span><span class="p">),</span>
         <span class="n">path_output</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"/data/projects/overvaag/ESHA/mlops_course/MLOps_G24/data/raw/training_jobopslag.parquet"</span><span class="p">),</span>
+        <span class="c1"># subset_size=100000,</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -8241,9 +8003,9 @@ Processing Batches:   1%|▏         | 43/3125 [01:05&lt;1:18:49,  1.53s/it]</pr
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
 <pre>/data/projects/overvaag/ESHA/mlops_course/misc/misc_venv/.venv/lib64/python3.12/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
   from .autonotebook import tqdm as notebook_tqdm
-<span class="ansi-green-fg">2026-01-11 08:23:33.249</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">255</span> - <span class="ansi-bold">START pipeline_data_create()</span>
-<span class="ansi-green-fg">2026-01-11 08:23:33.250</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">257</span> - <span class="ansi-bold">Extracting data</span>
-<span class="ansi-green-fg">2026-01-11 08:23:35.229</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">289</span> - <span class="ansi-bold">Loading hf model</span>
+<span class="ansi-green-fg">2026-01-11 21:03:56.805</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">161</span> - <span class="ansi-bold">START pipeline_data_create()</span>
+<span class="ansi-green-fg">2026-01-11 21:03:56.806</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">163</span> - <span class="ansi-bold">Extracting data</span>
+<span class="ansi-green-fg">2026-01-11 21:04:00.597</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">195</span> - <span class="ansi-bold">Loading hf model</span>
 </pre>
 </div>
 </div>
@@ -8263,27 +8025,27 @@ Token pooling      : first
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre><span class="ansi-green-fg">2026-01-11 08:23:39.772</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">293</span> - <span class="ansi-bold">Transforming data</span>
-Processing Batches: 100%|██████████| 3125/3125 [1:18:16&lt;00:00,  1.50s/it]
-<span class="ansi-green-fg">2026-01-11 09:41:57.167</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">301</span> - <span class="ansi-bold">Exporting data</span>
-<span class="ansi-green-fg">2026-01-11 09:41:57.309</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">304</span> - <span class="ansi-bold">Diagnostics</span>
-<span class="ansi-green-fg">2026-01-11 09:41:57.328</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">305</span> - <span class="ansi-bold">shape: (22, 2)
+<pre><span class="ansi-green-fg">2026-01-11 21:04:05.613</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">201</span> - <span class="ansi-bold">Transforming data</span>
+Processing Batches: 100%|██████████| 14307/14307 [5:42:46&lt;00:00,  1.44s/it]  
+<span class="ansi-green-fg">2026-01-12 02:46:54.359</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">208</span> - <span class="ansi-bold">Exporting data</span>
+<span class="ansi-green-fg">2026-01-12 02:46:54.539</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">211</span> - <span class="ansi-bold">Diagnostics</span>
+<span class="ansi-green-fg">2026-01-12 02:46:54.545</span> | <span class="ansi-bold">INFO    </span> | <span class="ansi-cyan-fg">__main__</span>:<span class="ansi-cyan-fg">pipeline_data_create</span>:<span class="ansi-cyan-fg">212</span> - <span class="ansi-bold">shape: (22, 2)
 ┌─────────────────────────────────┬───────┐
 │ erhvervsomraade_txt             ┆ len   │
 │ ---                             ┆ ---   │
 │ str                             ┆ u32   │
 ╞═════════════════════════════════╪═══════╡
-│ Tekstil og beklædning           ┆ 53    │
-│ Træ, møbel, glas og keramik     ┆ 106   │
-│ Design, formgivning og grafisk… ┆ 247   │
-│ Nærings- og nydelsesmiddel      ┆ 319   │
-│ Landbrug, skovbrug, gartneri, … ┆ 994   │
+│ Tekstil og beklædning           ┆ 189   │
+│ Træ, møbel, glas og keramik     ┆ 434   │
+│ Design, formgivning og grafisk… ┆ 1077  │
+│ Nærings- og nydelsesmiddel      ┆ 2057  │
+│ Landbrug, skovbrug, gartneri, … ┆ 3825  │
 │ …                               ┆ …     │
-│ Ledelse                         ┆ 6435  │
-│ Salg, indkøb og markedsføring   ┆ 7873  │
-│ Pædagogisk, socialt og kirkeli… ┆ 9711  │
-│ Akademisk arbejde               ┆ 13967 │
-│ Sundhed, omsorg og personlig p… ┆ 15526 │
+│ Ledelse                         ┆ 31867 │
+│ Salg, indkøb og markedsføring   ┆ 33289 │
+│ Pædagogisk, socialt og kirkeli… ┆ 52519 │
+│ Akademisk arbejde               ┆ 62441 │
+│ Sundhed, omsorg og personlig p… ┆ 68614 │
 └─────────────────────────────────┴───────┘</span>
 </pre>
 </div>
@@ -8291,7 +8053,7 @@ Processing Batches: 100%|██████████| 3125/3125 [1:18:16&lt;0
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedImage jp-OutputArea-output" tabindex="0">
-<img alt="No description has been provided for this image" class="" src="data:image/png;base64,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afjw4YqLi4t0XQAAABERVthZvny5/vCHP+iSSy6JdD0AAAARFdZDBR0Oh84888xI1wIAABBxYYWd22+/XY899pjCuGsdAACgW4V1Guu1117TunXrtHr1an3rW99SUlJSSP/zzz8fkeIAAABOVlhhJzU1VVdeeWWkawEAAIi4sMJOWVlZpOsAAADoEmFdsyNJR44c0SuvvKJf/epXOnTokCSprq5Ozc3NESsOAADgZIV1ZGffvn2aMmWKampqFAwG9d3vfld9+vTRz3/+cwWDQZWWlka6TgAAgLCEdWRn9uzZGjt2rD7++GP17NnTar/yyitVUVERseIAAABOVlhHdv72t7/p9ddf7/Tr5kOGDNFHH30UkcIAAAAiIawjOx0dHWpvb+/Uvn//fvXp0+ekiwIAAIiUsMLO5MmT9eijj1qv4+Li1NzcrPvuu4+fkAAAADElrNNYDz/8sHJzc5Wdna2Wlhb94Ac/0J49ezRgwAD97ne/i3SNAAAAYQsr7Jx22ml66623tHz5cm3fvl3Nzc2aMWOGCgoKQi5YBgAAiLawwo4kJSYm6rrrrotkLQAAABEXVth55plnvrR/+vTpYRUDAAAQaWGFndmzZ4e8bmtr0yeffCKHw6GUlBTCDgAAiBlh3Y318ccfhyzNzc2qrq7WhAkTuEAZAADElLB/G+vzsrKytGDBgk5HfQAAAKIpYmFH+vSi5bq6ukiuEgAA4KSEdc3On//855DXxhjV19frl7/8pS688MKIFAYAABAJYYWdK664IuR1XFycBg4cqIsvvlgPP/xwJOoCAACIiLDCTkdHR6TrAAAA6BIRvWYHAAAg1oR1ZKe4uPi4xy5atCicTQAAAEREWGFn69at2rp1q9ra2nT22WdLkt59910lJCRo9OjR1ri4uLjIVAkAABCmsMLOZZddpj59+ujpp59W3759JX36oMEbbrhBEydO1O233x7RIgEAAMIV1jU7Dz/8sEpKSqygI0l9+/bVAw88wN1YAAAgpoQVdgKBgA4cONCp/cCBAzp06NBJFwUAABApYYWdK6+8UjfccIOef/557d+/X/v379f//d//acaMGbrqqqsiXSMAAEDYwrpmp7S0VHPnztUPfvADtbW1fbqixETNmDFDDz30UEQLBAAAOBlhhZ2UlBQtWbJEDz30kN5//31J0hlnnKFevXpFtDgAAICT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"/>
+<img alt="No description has been provided for this image" class="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAjsAAAGdCAYAAAD0e7I1AAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjEwLjgsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvwVt1zgAAAAlwSFlzAAAPYQAAD2EBqD+naQAANSVJREFUeJzt3X90FPW9//FXfpMAu+FXdpMKEjEI4UcRqGEreNuSEiB6QWIrNkpADlSaWAFByS2iojWUKiJeNW2PJngrUjlHbQuCDeGHVWKAFJBfRlAkKNmEKyZLoCQhme8ffpnrGlBYNtlleD7OmXPY+Xxm5v35GHdfZ3ZmNsQwDEMAAAAWFRroAgAAAFoTYQcAAFgaYQcAAFgaYQcAAFgaYQcAAFgaYQcAAFgaYQcAAFgaYQcAAFhaeKALCAbNzc06evSoOnbsqJCQkECXAwAALoBhGDpx4oQSEhIUGnr+8zeEHUlHjx5V9+7dA10GAADwwZEjR3TVVVedt52wI6ljx46Svposm80W4GoAAMCF8Hg86t69u/k5fj6EHcn86spmsxF2AAC4zHzXJShcoAwAACyNsAMAACyNsAMAACyNa3YAAAgSTU1NamxsDHQZQSMsLEzh4eGX/FgYwg4AAEGgrq5On332mQzDCHQpQSUmJkbx8fGKjIz0eR+EHQAAAqypqUmfffaZYmJi1K1bNx5wq68eGNjQ0KBjx47p0KFDSkpK+tYHB34bwg4AAAHW2NgowzDUrVs3RUdHB7qcoBEdHa2IiAgdPnxYDQ0NateunU/74QJlAACCBGd0WvL1bI7XPvxQBwAAQNAi7AAAAEvjmh0AAIJUz3lr2vR4ny5Kv6j+P/rRjzRo0CAtXbq0dQryE87sAAAASyPsAAAASyPsAACAS1ZfX685c+boe9/7ntq3b6+UlBRt2rTJbC8sLFRsbKzefvtt9e3bVx06dNDo0aNVWVnZ6rVxzU4rO9f3rRf7nSgAAMEuJydH+/bt08qVK5WQkKA33nhDo0eP1u7du5WUlCRJOnXqlJ588kn9z//8j0JDQ3XnnXdqzpw5euWVV1q1Ns7sAACAS1JRUaGCggKtWrVKI0aMUK9evTRnzhwNHz5cBQUFZr/Gxkbl5+dr6NChGjx4sHJyclRcXNzq9XFmBwAAXJLdu3erqalJvXv39lpfX1+vLl26mK9jYmLUq1cv83V8fLyqq6tbvb6AntlpamrSQw89pMTEREVHR6tXr1567LHHvH4EzTAMLViwQPHx8YqOjlZqaqoOHDjgtZ/jx48rMzNTNptNsbGxmjp1qurq6tp6OAAAXJHq6uoUFhamsrIy7dy501z279+vZ555xuwXERHhtV1ISEib/PBpQM/s/O53v9MLL7yg5cuXq1+/ftq+fbumTJkiu92uX//615KkxYsXa9myZVq+fLkSExP10EMPKS0tTfv27TN/IyMzM1OVlZUqKipSY2OjpkyZounTp2vFihWBHB4AAFeE66+/Xk1NTaqurtaIESMCXU4LAQ07W7Zs0bhx45Se/tUFuz179tSrr76qrVu3SvrqrM7SpUs1f/58jRs3TpL08ssvy+Fw6M0339TEiRO1f/9+rVu3Ttu2bdPQoUMlSc8++6zGjh2rJ598UgkJCYEZHAAAV4jevXsrMzNTkyZN0lNPPaXrr79ex44dU3FxsQYOHGh+zgdKQMPOD3/4Q/3xj3/URx99pN69e2vXrl169913tWTJEknSoUOH5Ha7lZqaam5jt9uVkpKikpISTZw4USUlJYqNjTWDjiSlpqYqNDRUpaWluvXWW1sct76+XvX19eZrj8fTiqMEAMA3l9PduwUFBXr88cd1//336/PPP1fXrl01bNgw3XzzzYEuLbBhZ968efJ4POrTp4/CwsLU1NSk3/72t8rMzJQkud1uSZLD4fDazuFwmG1ut1txcXFe7eHh4ercubPZ55vy8vL06KOP+ns4AABcUb7+HJ2IiAg9+uij5/18nTx5siZPnuy1bvz48W1yzU5AL1B+7bXX9Morr2jFihX617/+peXLl+vJJ5/U8uXLW/W4ubm5qq2tNZcjR4606vEAAEDgBPTMzty5czVv3jxNnDhRkjRgwAAdPnxYeXl5ysrKktPplCRVVVUpPj7e3K6qqkqDBg2SJDmdzha3rZ05c0bHjx83t/+mqKgoRUVFtcKIAABAsAnomZ1Tp04pNNS7hLCwMDU3N0uSEhMT5XQ6vR445PF4VFpaKpfLJUlyuVyqqalRWVmZ2WfDhg1qbm5WSkpKG4wCAAAEs4Ce2bnlllv029/+Vj169FC/fv20Y8cOLVmyRHfffbekr+6/nzlzph5//HElJSWZt54nJCRo/PjxkqS+fftq9OjRmjZtmvLz89XY2KicnBxNnDiRO7EAAEBgw86zzz6rhx56SL/61a9UXV2thIQE/fKXv9SCBQvMPg888IBOnjyp6dOnq6amRsOHD9e6devMZ+xI0iuvvKKcnByNHDlSoaGhysjI0LJlywIxJAAAfNYWF+tebvwxJyEGMyuPxyO73a7a2lrZbDa/7psfAgUAfJfGxkYdPHhQCQkJstvtgS4nqHzxxReqrq5W7969FRYW5tV2oZ/f/DYWAAABFh4erpiYGB07dkwREREtrme9EhmGoVOnTqm6ulqxsbEtgs7FIOwAABBgISEhio+P16FDh3T48OFAlxNUYmNjz3t39YUi7AAAEAQiIyOVlJSkhoaGQJcSNCIiIi7pjM5ZhB0AAIJEaGio1w048A++FAQAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJZG2AEAAJYW0LDTs2dPhYSEtFiys7MlSadPn1Z2dra6dOmiDh06KCMjQ1VVVV77qKioUHp6umJiYhQXF6e5c+fqzJkzgRgOAAAIQgENO9u2bVNlZaW5FBUVSZJ+9rOfSZJmzZqlv//971q1apU2b96so0ePasKECeb2TU1NSk9PV0NDg7Zs2aLly5ersLBQCxYsCMh4AABA8AkxDMMIdBFnzZw5U6tXr9aBAwfk8XjUrVs3rVixQrfddpsk6cMPP1Tfvn1VUlKiYcOGae3atbr55pt19OhRORwOSVJ+fr4efPBBHTt2TJGRkRd0XI/HI7vdrtraWtlsNr+Oqee8NS3Wfboo3a/HAADgSnShn99Bc81OQ0OD/vznP+vuu+9WSEiIysrK1NjYqNTUVLNPnz591KNHD5WUlEiSSkpKNGDAADPoSFJaWpo8Ho/27t173mPV19fL4/F4LQAAwJqCJuy8+eabqqmp0eTJkyVJbrdbkZGRio2N9erncDjkdrvNPl8POmfbz7adT15enux2u7l0797dfwMBAABBJWjCzosvvqgxY8YoISGh1Y+Vm5ur2tpaczly5EirHxMAAARGeKALkKTDhw9r/fr1ev311811TqdTDQ0Nqqmp8Tq7U1VVJafTafbZunWr177O3q11ts+5REVFKSoqyo8jAAAAwSoozuwUFBQoLi5O6en/d+HukCFDFBERoeLiYnNdeXm5Kioq5HK5JEkul0u7d+9WdXW12aeoqEg2m03JycltNwAAABC0An5mp7m5WQUFBcrKylJ4+P+VY7fbNXXqVM2ePVudO3eWzWbTvffeK5fLpWHDhkmSRo0apeTkZN11111avHix3G635s+fr+zsbM7cAAAASUEQdtavX6+KigrdfffdLdqefvpphYaGKiMjQ/X19UpLS9Pzzz9vtoeFhWn16tWaMWOGXC6X2rdvr6ysLC1cuLAthwAAAIJYUD1nJ1B4zg4AAJefy+45OwAAAK2BsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACyNsAMAACwt4GHn888/15133qkuXbooOjpaAwYM0Pbt2812wzC0YMECxcfHKzo6WqmpqTpw4IDXPo4fP67MzEzZbDbFxsZq6tSpqqura+uhAACAIBTQsPPll1/qxhtvVEREhNauXat9+/bpqaeeUqdOncw+ixcv1rJly5Sfn6/S0lK1b99eaWlpOn36tNknMzNTe/fuVVFRkVavXq133nlH06dPD8SQAABAkAkxDMMI1MHnzZun9957T//85z/P2W4YhhISEnT//fdrzpw5kqTa2lo5HA4VFhZq4sSJ2r9/v5KTk7Vt2zYNHTpUkrRu3TqNHTtWn332mRISEr6zDo/HI7vdrtraWtlsNv8NUFLPeWtarPt0UbpfjwEAwJXoQj+/A3pm529/+5uGDh2qn/3sZ4qLi9P111+vP/3pT2b7oUOH5Ha7lZqaaq6z2+1KSUlRSUmJJKmkpESxsbFm0JGk1NRUhYaGqrS09JzHra+vl8fj8VoAAIA1BTTsfPLJJ3rhhReUlJSkt99+WzNmzNCvf/1rLV++XJLkdrslSQ6Hw2s7h8NhtrndbsXFxXm1h4eHq3Pnzmafb8rLy5PdbjeX7t27+3toAAAgSAQ07DQ3N2vw4MF64okndP3112v69OmaNm2a8vPzW/W4ubm5qq2tNZcjR4606vEAAEDgBDTsxMfHKzk52Wtd3759VVFRIUlyOp2SpKqqKq8+VVVVZpvT6VR1dbVX+5kzZ3T8+HGzzzdFRUXJZrN5LQAAwJoCGnZuvPFGlZeXe6376KOPdPXVV0uSEhMT5XQ6VVxcbLZ7PB6VlpbK5XJJklwul2pqalRWVmb22bBhg5qbm5WSktIGowAAAMEsPJAHnzVrln74wx/qiSee0M9//nNt3bpVf/zjH/XHP/5RkhQSEqKZM2fq8ccfV1JSkhITE/XQQw8pISFB48ePl/TVmaDRo0ebX381NjYqJydHEydOvKA7sQAAgLUFNOz84Ac/0BtvvKHc3FwtXLhQiYmJWrp0qTIzM80+DzzwgE6ePKnp06erpqZGw4cP17p169SuXTuzzyuvvKKcnByNHDlSoaGhysjI0LJlywIxJAAAEGQC+pydYMFzdgAAuPxcFs/ZAQAAaG2EHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGmEHQAAYGkBDTuPPPKIQkJCvJY+ffqY7adPn1Z2dra6dOmiDh06KCMjQ1VVVV77qKioUHp6umJiYhQXF6e5c+fqzJkzbT0UAAAQpMIDXUC/fv20fv1683V4+P+VNGvWLK1Zs0arVq2S3W5XTk6OJkyYoPfee0+S1NTUpPT0dDmdTm3ZskWVlZWaNGmSIiIi9MQTT7T5WAAAQPAJeNgJDw+X0+lssb62tlYvvviiVqxYoZ/85CeSpIKCAvXt21fvv/++hg0bpn/84x/at2+f1q9fL4fDoUGDBumxxx7Tgw8+qEceeUSRkZFtPRwAABBkfPoa65NPPvFbAQcOHFBCQoKuueYaZWZmqqKiQpJUVlamxsZGpaammn379OmjHj16qKSkRJJUUlKiAQMGyOFwmH3S0tLk8Xi0d+/e8x6zvr5eHo/HawEAANbkU9i59tpr9eMf/1h//vOfdfr0aZ8PnpKSosLCQq1bt04vvPCCDh06pBEjRujEiRNyu92KjIxUbGys1zYOh0Nut1uS5Ha7vYLO2fazbeeTl5cnu91uLt27d/d5DAAAILj5FHb+9a9/aeDAgZo9e7acTqd++ctfauvWrRe9nzFjxuhnP/uZBg4cqLS0NL311luqqanRa6+95ktZFyw3N1e1tbXmcuTIkVY9HgAACByfws6gQYP0zDPP6OjRo3rppZdUWVmp4cOHq3///lqyZImOHTvmUzGxsbHq3bu3Dh48KKfTqYaGBtXU1Hj1qaqqMq/xcTqdLe7OOvv6XNcBnRUVFSWbzea1AAAAa7qkW8/Dw8M1YcIErVq1Sr/73e908OBBzZkzR927d9ekSZNUWVl5Ufurq6vTxx9/rPj4eA0ZMkQREREqLi4228vLy1VRUSGXyyVJcrlc2r17t6qrq80+RUVFstlsSk5OvpShAQAAi7iksLN9+3b96le/Unx8vJYsWaI5c+bo448/VlFRkY4ePapx48Z96/Zz5szR5s2b9emnn2rLli269dZbFRYWpjvuuEN2u11Tp07V7NmztXHjRpWVlWnKlClyuVwaNmyYJGnUqFFKTk7WXXfdpV27duntt9/W/PnzlZ2draioqEsZGgAAsAifbj1fsmSJCgoKVF5errFjx+rll1/W2LFjFRr6VXZKTExUYWGhevbs+a37+eyzz3THHXfoiy++ULdu3TR8+HC9//776tatmyTp6aefVmhoqDIyMlRfX6+0tDQ9//zz5vZhYWFavXq1ZsyYIZfLpfbt2ysrK0sLFy70ZVgAAMCCQgzDMC52o6SkJN19992aPHmy4uPjz9mnoaFBr776qrKysi65yNbm8Xhkt9tVW1vr9+t3es5b02Ldp4vS/XoMAACuRBf6+e3TmZ0DBw58Z5/IyMjLIugAAABr8+manYKCAq1atarF+lWrVmn58uWXXBQAAIC/+BR28vLy1LVr1xbr4+Li+E0qAAAQVHwKOxUVFUpMTGyx/uqrrzZ/7gEAACAY+BR24uLi9MEHH7RYv2vXLnXp0uWSiwIAAPAXn8LOHXfcoV//+tfauHGjmpqa1NTUpA0bNui+++7TxIkT/V0jAACAz3y6G+uxxx7Tp59+qpEjRyo8/KtdNDc3a9KkSVyzAwAAgopPYScyMlJ/+ctf9Nhjj2nXrl2Kjo7WgAEDdPXVV/u7PgAAgEviU9g5q3fv3urdu7e/agEAAPA7n8JOU1OTCgsLVVxcrOrqajU3N3u1b9iwwS/FAQAAXCqfws59992nwsJCpaenq3///goJCfF3XQAAAH7hU9hZuXKlXnvtNY0dO9bf9QAAAPiVT7eeR0ZG6tprr/V3LQAAAH7nU9i5//779cwzz8iHH0wHAABoUz59jfXuu+9q48aNWrt2rfr166eIiAiv9tdff90vxQEAAFwqn8JObGysbr31Vn/XAgAA4Hc+hZ2CggJ/1wEAANAqfLpmR5LOnDmj9evX6w9/+INOnDghSTp69Kjq6ur8VhwAAMCl8unMzuHDhzV69GhVVFSovr5eP/3pT9WxY0f97ne/U319vfLz8/1dJwAAgE98OrNz3333aejQofryyy8VHR1trr/11ltVXFzst+IAAAAulU9ndv75z39qy5YtioyM9Frfs2dPff75534pDAAAwB98OrPT3NyspqamFus/++wzdezY8ZKLAgAA8Befws6oUaO0dOlS83VISIjq6ur08MMP8xMSAAAgqPj0NdZTTz2ltLQ0JScn6/Tp0/rFL36hAwcOqGvXrnr11Vf9XSMAAIDPfAo7V111lXbt2qWVK1fqgw8+UF1dnaZOnarMzEyvC5YBAAACzaewI0nh4eG68847/VkLAACA3/kUdl5++eVvbZ80aZJPxQAAAPibT2Hnvvvu83rd2NioU6dOKTIyUjExMYQdAAAQNHy6G+vLL7/0Wurq6lReXq7hw4dzgTIAAAgqPv821jclJSVp0aJFLc76AAAABJLfwo701UXLR48e9ecuAQAALolP1+z87W9/83ptGIYqKyv13//937rxxhv9UhgAAIA/+HRmZ/z48V7LhAkT9Mgjj2jgwIF66aWXfCpk0aJFCgkJ0cyZM811p0+fVnZ2trp06aIOHTooIyNDVVVVXttVVFQoPT1dMTExiouL09y5c3XmzBmfagAAANbj05md5uZmvxaxbds2/eEPf9DAgQO91s+aNUtr1qzRqlWrZLfblZOTowkTJui9996TJDU1NSk9PV1Op1NbtmxRZWWlJk2apIiICD3xxBN+rREAAFye/HrNji/q6uqUmZmpP/3pT+rUqZO5vra2Vi+++KKWLFmin/zk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qampZp8+ffqoR48eKikpkSSVlJRowIABZtCRpLS0NHk8Hu3du/ecx6mvr5fH4/FaAACANQVN2GlubtbMmTN14403qn///pIkt9utyMhIxcbGevV1OBxyu91mn68HnbPtZ9vOJS8vT3a73Vy6d+/u59EAAIBgETRhJzs7W3v27NHKlStb/Vi5ubmqra01lyNHjrT6MQEAQGCEB7oAScrJydHq1av1zjvv6KqrrjLXO51ONTQ0qKamxuvsTlVVlZxOp9ln69atXvs7e7fW2T7fFBUVpaioKD+PAgAABKOAntkxDEM5OTl64403tGHDBiUmJnq1DxkyRBERESouLjbXlZeXq6KiQi6XS5Lkcrm0e/duVVdXm32Kiopks9mUnJzcNgMBAABBK6BndrKzs7VixQr99a9/VceOHc1rbOx2u6Kjo2W32zV16lTNnj1bnTt3ls1m07333iuXy6Vhw4ZJkkaNGqXk5GTdddddWrx4sdxut+bPn6/s7GzO3gAAgMCGnRdeeEGS9KMf/chrfUFBgSZPnixJevrppxUaGqqMjAzV19crLS1Nzz//vNk3LCxMq1ev1owZM+RyudS+fXtlZWVp4cKFbTUMAAAQxILqOTuBwnN2AAC4/FyWz9kBAADwN8IOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwNMIOAACwtPBAF3Al6jlvjdfrTxelB6gSAACsjzM7AADA0gg7AADA0gg7AADA0gIadt555x3dcsstSkhIUEhIiN58802vdsMwtGDBAsXHxys6Olqpqak6cOCAV5/jx48rMzNTNptNsbGxmjp1qurq6tpwFAAAIJgFNOycPHlS3//+9/Xcc8+ds33x4sVatmyZ8vPzVVpaqvbt2ystLU2nT582+2RmZmrv3r0qKirS6tWr9c4772j69OltNQQAABDkAno31pgxYzRmzJhzthmGoaVLl2r+/PkaN26cJOnll1+Ww+HQm2++qYkTJ2r//v1at26dtm3bpqFDh0qSnn32WY0dO1ZPPvmkEhIS2mwsAAAgOAXtNTuHDh2S2+1Wamqquc5utyslJUUlJSWSpJKSEsXGxppBR5JSU1MVGhqq0tLS8+67vr5eHo/HawEAANYUtGHH7XZLkhwOh9d6h8NhtrndbsXFxXm1h4eHq3Pnzmafc8nLy5PdbjeX7t27+7l6AAAQLII27LSm3Nxc1dbWmsuRI0cCXRIAAGglQRt2nE6nJKmqqsprfVVVldnmdDpVXV3t1X7mzBkdP37c7HMuUVFRstlsXgsAALCmoA07iYmJcjqdKi4uNtd5PB6VlpbK5XJJklwul2pqalRWVmb22bBhg5qbm5WSktLmNQMAgOAT0Lux6urqdPDgQfP1oUOHtHPnTnXu3Fk9evTQzJkz9fjjjyspKUmJiYl66KGHlJCQoPHjx0uS+vbtq9GjR2vatGnKz89XY2OjcnJyNHHiRO7EAgAAkgIcdrZv364f//jH5uvZs2dLkrKyslRYWKgHHnhAJ0+e1PTp01VTU6Phw4dr3bp1ateunbnNK6+8opycHI0cOVKhoaHKyMjQsmXL2nwsAAAgOIUYhmEEuohA83g8stvtqq2t9fv1O9/8hfNz4VfPAQC4eBf6+R201+wAAAD4A2EHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYGmEHAABYWnigC4DUc96aFus+XZQegEoAALAezuwAAABLI+wAAABLI+wAAABLI+wAAABLI+wAAABL426sIPXNO7S4OwsAAN9wZgcAAFgaYQcAAFgaYQcAAFgaYQcAAFgaYQcAAFgad2NdJvj9LAAAfMOZHQAAYGmEHQAAYGmEHQAAYGmWCTvPPfecevbsqXbt2iklJUVbt24NdEmtrue8NV4LAABoyRIXKP/lL3/R7NmzlZ+fr5SUFC1dulRpaWkqLy9XXFxcoMtrM1zEDABAS5YIO0uWLNG0adM0ZcoUSVJ+fr7WrFmjl156SfPmzQtwdcGP3+ECAFjZZR92GhoaVFZWptzcXHNdaGioUlNTVVJScs5t6uvrVV9fb76ura2VJHk8Hr/X11x/yu/7vBg9Zq1qlW32PJr2nX36P/y2X7Y71zbn2vd3HcvXevzlQsYFALhwZz+3DcP49o7GZe7zzz83JBlbtmzxWj937lzjhhtuOOc2Dz/8sCGJhYWFhYWFxQLLkSNHvjUrXPZndnyRm5ur2bNnm6+bm5t1/PhxdenSRSEhIX47jsfjUffu3XXkyBHZbDa/7Rf/hzlufcxx62OOWx9z3PoCMceGYejEiRNKSEj41n6Xfdjp2rWrwsLCVFVV5bW+qqpKTqfznNtERUUpKirKa11sbGxrlSibzcb/XK2MOW59zHHrY45bH3Pc+tp6ju12+3f2uexvPY+MjNSQIUNUXFxsrmtublZxcbFcLlcAKwMAAMHgsj+zI0mzZ89WVlaWhg4dqhtuuEFLly7VyZMnzbuzAADAlcsSYef222/XsWPHtGDBArndbg0aNEjr1q2Tw+EIaF1RUVF6+OGHW3xlBv9hjlsfc9z6mOPWxxy3vmCe4xDD+K77tQAAAC5fl/01OwAAAN+GsAMAACyNsAMAACyNsAMAACyNsNOKnnvuOfXs2VPt2rVTSkqKtm7dGuiSgtIjjzyikJAQr6VPnz5m++nTp5Wdna0uXbqoQ4cOysjIaPEQyYqKCqWnpysmJkZxcXGaO3euzpw549Vn06ZNGjx4sKKionTttdeqsLCwLYYXEO+8845uueUWJSQkKCQkRG+++aZXu2EYWrBggeLj4xUdHa3U1FQdOHDAq8/x48eVmZkpm82m2NhYTZ06VXV1dV59PvjgA40YMULt2rVT9+7dtXjx4ha1rFq1Sn369FG7du00YMAAvfXWW34fbyB81xxPnjy5xd/16NGjvfowx+eXl5enH/zgB+rYsaPi4uI0fvx4lZeXe/Vpy/cGq76fX8g8/+hHP2rxt3zPPfd49Qn6efbLD1ShhZUrVxqRkZHGSy+9ZOzdu9eYNm2aERsba1RVVQW6tKDz8MMPG/369TMqKyvN5dixY2b7PffcY3Tv3t0oLi42tm/fbgwbNsz44Q9/aLafOXPG6N+/v5Gammrs2LHDeOutt4yuXbsaubm5Zp9PPvnEiImJMWbPnm3s27fPePbZZ42wsDBj3bp1bTrWtvLWW28Zv/nNb4zXX3/dkGS88cYbXu2LFi0y7Ha78eabbxq7du0y/vM//9NITEw0/v3vf5t9Ro8ebXz/+9833n//feOf//ynce211xp33HGH2V5bW2s4HA4jMzPT2LNnj/Hqq68a0dHRxh/+8Aezz3vvvWeEhYUZixcvNvbt22fMnz/fiIiIMHbv3t3qc9DavmuOs7KyjNGjR3v9XR8/ftyrD3N8fmlpaUZBQYGxZ88eY+fOncbYsWONHj16GHV1dWaftnpvsPL7+YXM83/8x38Y06ZN8/pbrq2tNdsvh3km7LSSG264wcjOzjZfNzU1GQkJCUZeXl4AqwpODz/8sPH973//nG01NTVGRESEsWrVKnPd/v37DUlGSUmJYRhffeiEhoYabrfb7PPCCy8YNpvNqK+vNwzDMB544AGjX79+Xvu+/fbbjbS0ND+PJvh884O4ubnZcDqdxu9//3tzXU1NjREVFWW8+uqrhmEYxr59+wxJxrZt28w+a9euNUJCQozPP//cMAzDeP75541OnTqZc2wYhvHggw8a1113nfn65z//uZGenu5VT0pKivHLX/7Sr2MMtPOFnXHjxp13G+b44lRXVxuSjM2bNxuG0bbvDVfS+/k359kwvgo7991333m3uRzmma+xWkFDQ4PKysqUmppqrgsNDVVqaqpKSkoCWFnwOnDggBISEnTNNdcoMzNTFRUVkqSysjI1NjZ6zWWfPn3Uo0cPcy5LSko0YMAAr4dIpqWlyePxaO/evWafr+/jbJ8r8b/HoUOH5Ha7vebDbrcrJSXFa05jY2M1dOhQs09qaqpCQ0NVWlpq9rnpppsUGRlp9klLS1N5ebm+/PJLs8+VPO+bNm1SXFycrrvuOs2YMUNffPGF2cYcX5za2lpJUufOnSW13XvDlfZ+/s15PuuVV15R165d1b9/f+Xm5urUqVNm2+Uwz5Z4gnKw+d///V81NTW1eIKzw+HQhx9+GKCqgldKSooKCwt13XXXqbKyUo8++qhGjBihPXv2yO12KzIyssUPtTocDrndbkmS2+0+51yfbfu2Ph6PR//+978VHR3dSqMLPmfn5Fzz8fX5iouL82oPDw9X586dvfokJia22MfZtk6dOp133s/uw8pGjx6tCRMmKDExUR9//LH+67/+S2PGjFFJSYnCwsKY44vQ3NysmTNn6sYbb1T//v0lqc3eG7788ssr5v38XPMsSb/4xS909dVXKyEhQR988IEefPBBlZeX6/XXX5d0ecwzYQcBN2bMGPPfAwcOVEpKiq6++mq99tprV1QIgbVMnDjR/PeAAQM0cOBA9erVS5s2bdLIkSMDWNnlJzs7W3v27NG7774b6FIs7XzzPH36dPPfAwYMUHx8vEaOHKmPP/5YvXr1ausyfcLXWK2ga9euCgsLa3FXQFVVlZxOZ4CqunzExsaqd+/eOnjwoJxOpxoaGlRTU+PV5+tz6XQ6zznXZ9u+rY/NZrviAtXZOfm2v0+n06nq6mqv9jNnzuj48eN+mfcr8f+Da665Rl27dtXBgwclMccXKicnR6tXr9bGjRt11VVXmevb6r3hSnk/P988n0tKSookef0tB/s8E3ZaQWRkpIYMGaLi4mJzXXNzs4qLi+VyuQJY2eWhrq5OH3/8seLj4zVkyBBFRER4zWV5ebkqKirMuXS5XNq9e7fXB0dRUZFsNpuSk5PNPl/fx9k+V+J/j8TERDmdTq/58Hg8Ki0t9ZrTmpoalZWVmX02bNig5uZm843O5XLpnXfeUWNjo9mnqKhI1113nTp16mT2Yd6/8tlnn+mLL75QfHy8JOb4uxiGoZycHL3xxhvasGFDi6/z2uq9werv5981z+eyc+dOSfL6Ww76eb7kS5xxTitXrjSioqKMwsJCY9++fcb06dON2NhYr6vV8ZX777/f2LRpk3Ho0CHjvffeM1JTU42uXbsa1dXVhmF8dXtpjx49jA0bNhjbt283XC6X4XK5zO3P3vY4atQoY+fOnca6deuMbt26nfO2x7lz5xr79+83nnvuOUvfen7ixAljx44dxo4dOwxJxpIlS4wdO3YYhw8fNgzjq1vPY2Njjb/+9a/GBx98YIwbN+6ct55ff/31RmlpqfHuu+8aSUlJXrdF19TUGA6Hw7jrrruMPXv2GCtXrjRiYmJa3BYdHh5uPPnkk8b+/fuNhx9+2BK3RRvGt8/xiRMnjDlz5hglJSXGoUOHjPXr1xuDBw82kpKSjNOnT5v7YI7Pb8aMGYbdbjc2bdrkdcvzqVOnzD5t9d5g5ffz75rngwcPGgsXLjS2b99uHDp0yPjrX/9qXHPNNcZNN91k7uNymGfCTit69tlnjR49ehiRkZHGDTfcYLz//vuBLiko3X777UZ8fLwRGRlpfO973zNuv/124+DBg2b7v//9b+NXv/qV0alTJyMmJsa49dZbjcrKSq99fPrpp8aYMWOM6Ohoo2vXrsb9999vNDY2evXZuHGjMWjQICMyMtK45pprjIKCgrYYXkBs3LjRkNRiycrKMgzjq9vPH3roIcPhcBhRUVHGyJEjjfLycq99fPHFF8Ydd9xhdOjQwbDZbMaUKVOMEydOePXZtWuXMXz4cCMqKsr43ve+ZyxatKhFLa+99prRu3dvIzIy0ujXr5+xZs2aVht3W/q2OT516pQxatQoo1u3bkZERIRx9dVXG9OmTWvxps0cn9+55laS1/+3bfneYNX38++a54qKCuOmm24yOnfubERFRRnXXnutMXfuXK/n7BhG8M9zyP8fLAAAgCVxzQ4AALA0wg4AALA0wg4AALA0wg4AALA0wg4AALA0wg4AALA0wg4AALA0wg4AALA0wg4AALA0wg4AALA0wg4AALA0wg4AALC0/wfvQ/rfqgpJgAAAAABJRU5ErkJggg=="/>
 </div>
 </div>
 </div>

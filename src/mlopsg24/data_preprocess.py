@@ -20,7 +20,7 @@ class PreprocessData():
         val_size: float = 0.1,
         random_state: int = 42,
         batch_size:int=32,
-        output_dir: Path = Path("data/processed"),
+        path_output: Path = Path("data/processed"),
         column_target_class:str= "erhvervsomraade_txt",
         column_text:str= "annonce_tekst",
         embedding_prefix:str=(
@@ -35,12 +35,15 @@ class PreprocessData():
         self.test_size = test_size
         self.val_size = val_size
         self.random_state = random_state
-        self.output_dir = output_dir
+        self.path_output = path_output
         self.column_target_class = column_target_class
         self.column_text = column_text
         self.embedding_prefix = embedding_prefix
         self.batch_size = batch_size
 
+        if not self.path_output.exists():
+            logger.info(f"Creating data processed output directory: {self.path_output}")
+            self.path_output.mkdir(parents=True, exist_ok=True)
 
     def extract_input_data(self) -> None:
         """
@@ -144,7 +147,7 @@ class PreprocessData():
                 schema=("categori", "idx"),
                 orient='row',
                 )
-            .write_parquet(self.output_dir / "category_mapping.parquet")
+            .write_parquet(self.path_output / "category_mapping.parquet")
         )
 
         logger.info(f"Targets shape: {self.y_targets.shape}")
@@ -185,14 +188,14 @@ class PreprocessData():
         """
         logger.info("Saving data")
 
-        torch.save(self.x_train, self.output_dir / "x_train.pt")
-        torch.save(self.x_val, self.output_dir / "x_val.pt")
-        torch.save(self.x_test, self.output_dir / "x_test.pt")
-        torch.save(self.y_train, self.output_dir / "y_train.pt")
-        torch.save(self.y_val, self.output_dir / "y_val.pt")
-        torch.save(self.y_test, self.output_dir / "y_test.pt")
+        torch.save(self.x_train, self.path_output / "x_train.pt")
+        torch.save(self.x_val, self.path_output / "x_val.pt")
+        torch.save(self.x_test, self.path_output / "x_test.pt")
+        torch.save(self.y_train, self.path_output / "y_train.pt")
+        torch.save(self.y_val, self.path_output / "y_val.pt")
+        torch.save(self.y_test, self.path_output / "y_test.pt")
 
-        logger.info(f"All tensors saved successfully to {self.output_dir}")
+        logger.info(f"All tensors saved successfully to {self.path_output}")
 
 
     def main(self):

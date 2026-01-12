@@ -222,7 +222,7 @@ if __name__ == "__main__":
     pipeline_data_create(
         path_model_gliner2=Path("/data/projects/overvaag/ESHA/hf_models/gliner2-multi-v1"),
         path_output=Path("/data/projects/overvaag/ESHA/mlops_course/MLOps_G24/data/raw/training_jobopslag.parquet"),
-        subset_size=100000,
+        # subset_size=100000,
     )
 
 # %%
