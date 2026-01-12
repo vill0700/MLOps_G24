@@ -14,7 +14,7 @@ class PreprocessData():
 
     def __init__(
         self,
-        path_text_embedder: Path = Path("models/intfloat/multilingual-e5-large-instruct"),
+        path_text_embedder: str|Path = Path("models/intfloat/multilingual-e5-large-instruct"),
         file_data_raw: Path = Path("data/raw/training_jobopslag.parquet"),
         test_size: float = 0.2,
         val_size: float = 0.1,
@@ -216,6 +216,9 @@ class PreprocessData():
 
 if __name__ == "__main__":
     # Run preprocessing
-    PreprocessData(batch_size=256).main()
+    PreprocessData(
+        batch_size=256,
+        path_text_embedder="intfloat/multilingual-e5-large-instruct",
+    ).main()
 
 # %%
