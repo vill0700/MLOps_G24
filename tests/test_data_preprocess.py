@@ -43,6 +43,10 @@ def test_existing_path_output_does_not_error(tmp_path):
     assert preprocessor.path_output.exists()
 
 
+@pytest.mark.skipif(
+    not PreprocessData().file_data_raw.exists(),
+    reason="Data files not found. github does not have access to data file so CI will fail"
+)
 def test_validate_extracted_data():
     """
     Does a data validation check on the data loaded into the model.
@@ -77,7 +81,10 @@ def test_validate_extracted_data():
 
     assert is_valid(TrainingDataSchema, instance_preprocess.df_jobopslag), "Data validation failed!"
 
-
+@pytest.mark.skipif(
+    not PreprocessData().file_data_raw.exists(),
+    reason="Data files not found. github does not have access to data file so CI will fail"
+)
 def test_target_has_exactly_22_categories():
     """
     Standard pytest design for data validation,

@@ -10,7 +10,11 @@ on:
 
 jobs:
   esben_test:
-    runs-on: "ubuntu-latest"
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        python-version: ["3.12", "3.11"]
 
     steps:
       - name: Checkout to branch
@@ -27,3 +31,5 @@ jobs:
       - name: Test with pytest
         run: |
           uv run pytest
+
+          uv run pytest -k "not test_target_has_exactly_22_categories "
