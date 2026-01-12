@@ -10,16 +10,16 @@ print(f"Using device: {device}")
 
 #Neural Network for Job Advertisement Classification
 class NeuralNetwork(nn.Module):
-    def __init__(self,input_size=768, num_classes=20):
+    def __init__(self,input_size=1024, num_classes=22):
         super().__init__()
         self.flatten = nn.Flatten()
 
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(input_size, 512),
             nn.ReLU(),
-            nn.Linear(512, 512),
+            nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Linear(512, num_classes),
+            nn.Linear(256, num_classes),
         )
 
     def forward(self, x):
