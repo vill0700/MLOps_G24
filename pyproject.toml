@@ -29,6 +29,7 @@ dependencies = [
     "polars>=1.36.1",
     "pyarrow>=22.0.0",
     "sentence-transformers>=5.2.0",
+    "streamlit>=1.52.2",
     "torch==2.2.2",
     "typer==0.15.1",
     "uvicorn==0.34.0",
