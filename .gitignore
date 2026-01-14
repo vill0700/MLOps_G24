@@ -2,6 +2,8 @@
 models/*
 data/*
 
+#just a personal script
+.debugger_entrypoint.py
 
 docs/site/
 
