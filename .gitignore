@@ -2,6 +2,7 @@
 models/*
 data/*
 
+.debugger_entrypoint.py
 
 docs/site/
 
