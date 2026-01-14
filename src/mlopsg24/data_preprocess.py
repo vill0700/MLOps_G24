@@ -54,15 +54,16 @@ class PreprocessData():
         self.df_jobopslag = pl.read_parquet(self.file_data_raw)
 
 
-    def init_text_embedder(self):
+    def init_text_embedder(self, gpu:bool=True):
         """
         Initialize SentenceTransformer model for text embeddings.
+        Default tries to use GPU
         """
         logger.info(f"Loading text embedder from {self.path_text_embedder}")
 
         self.text_embedder = SentenceTransformer(
             model_name_or_path = str(self.path_text_embedder),
-            device='cuda' if torch.cuda.is_available() else 'cpu',
+            device='cuda' if (torch.cuda.is_available() and gpu) else 'cpu',
         )
 
     def create_x_features(self):

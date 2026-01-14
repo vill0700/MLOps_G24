@@ -13,7 +13,7 @@ import torch
 import html
 
 #Internal package, not publicly avaiable
-from bmdb import db_uri
+# from bmdb import db_uri
 
 
 def prepare_text(
@@ -74,6 +74,45 @@ def prepare_text(
     return df_results
 
 
+def augment_jobopslag_text(
+    text:str,
+    model_gliner2:GLiNER2,
+) -> str:
+    """
+    Process a single text through GLiNER2 extraction and formatting.
+
+    Args:
+        text: Input text to process
+        model_gliner2: GLiNER2 model instance
+
+    Returns:
+        Formatted string with extracted entities or empty string on error
+    """
+
+    entities_to_extract:list=["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
+
+    try:
+        dict_extracted = model_gliner2.extract_entities(text, entities_to_extract)
+        entities = dict_extracted.get('entities', {})
+
+        str_stil = f"{', '.join(entities.get('stillingsbetegnelser', []))}. "
+        # str_komp = f"{', '.join(entities.get('kompetencer', []))}. "
+        # str_opg = f"{', '.join(entities.get('arbejdsopgaver', []))}. "
+
+        entities_stil = entities.get('stillingsbetegnelser', None)
+        entities_komp = entities.get('kompetencer')
+        entities_opg = entities.get('arbejdsopgaver')
+
+        if not any([entities_stil, entities_komp, entities_opg]):
+            logger.error("FAILED to extract neither stillingsbetegnelser, kompetencer nor arbejdsopgaver")
+
+        return f"{', '.join(entities_stil)}, {', '.join(entities_komp)}, {', '.join(entities_opg)}"
+
+    except Exception as e:
+        logger.error(f"FAILED extraction: {e}")
+        return ""
+
+
 def prepare_text_bactched(
     df_jobopslag_raw: pl.DataFrame,
     model_gliner2: GLiNER2,
@@ -96,27 +135,15 @@ def prepare_text_bactched(
     # 1. Extract texts to process
     all_texts = df_jobopslag_raw["annonce_tekst"].to_list()
     results = []
-    entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
 
     # 1. Batch processing loop of GLiNER2
     for i in tqdm(range(0, len(all_texts), batch_size), desc="Processing Batches"):
         batch = all_texts[i : i + batch_size]
 
         # Inference
-        batch_output = [model_gliner2.extract_entities(text, entities) for text in batch]
-
-        for dict_extracted in batch_output:
-            try:
-                # 2. rewrite
-                ent = dict_extracted.get('entities', {})
-                str_stil = f"{', '.join(ent.get('stillingsbetegnelser', []))}. "
-                str_komp = f"{', '.join(ent.get('kompetencer', []))}. "
-                str_opg = f"{', '.join(ent.get('arbejdsopgaver', []))}. "
-
-                results.append(str_stil + str_komp + str_opg)
-            except Exception as e:
-                logger.error(f"FAILED extraction at row {i}: {e}")
-                results.append(None)
+        for text in batch:
+            result = augment_jobopslag_text(text, model_gliner2)
+            results.append(result)
 
     # 3. UUID generation
     uuids = [str(uuid.uuid4()) for _ in range(df_jobopslag_raw.height)]
@@ -219,10 +246,7 @@ def pipeline_data_create(
 
 if __name__ == "__main__":
 
-    pipeline_data_create(
-        path_model_gliner2=Path("/data/projects/overvaag/ESHA/hf_models/gliner2-multi-v1"),
-        path_output=Path("/data/projects/overvaag/ESHA/mlops_course/MLOps_G24/data/raw/training_jobopslag.parquet"),
-        # subset_size=100000,
-    )
+    #cannot be run by others than Esben Opstrup
+    pipeline_data_create()
 
 # %%

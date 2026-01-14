@@ -21,6 +21,7 @@ dependencies = [
     "dataframely>=2.4.0",
     "fastapi==0.115.6",
     "gliner2>=1.2.3",
+    "httpx>=0.28.1",
     "ipykernel>=7.1.0",
     "loguru>=0.7.3",
     "numpy==1.26.4",
