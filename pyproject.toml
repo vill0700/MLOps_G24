@@ -1,3 +1,7 @@
+[tool.hatch.build.targets.wheel]
+packages = ["src/mlopsg24"]
+#NOTE: install packeg in venv - makes it possible to import modules form anywhere
+
 [build-system]
 requires = ["uv_build>=0.9.22,<0.10.0"]
 build-backend = "uv_build"
