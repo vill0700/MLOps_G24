@@ -6,6 +6,18 @@ import polars as pl
 from mlopsg24.data_create import augment_jobopslag_text
 from mlopsg24.data_preprocess import PreprocessData
 
+# === This is a check that .env can be used for environment variables ===
+# It has nothing to do with the inference module as such
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+examplevar = os.getenv('EXAMPLEVAR')
+if examplevar:
+    logger.info(f".env loaded as  as expected: {os.getenv('EXAMPLEVAR')=}")
+else:
+    logger.error(".env did not load properly")
+# ===
 
 class InferenceClassify():
     """
@@ -51,9 +63,18 @@ class InferenceClassify():
             normalize_embeddings=True,
         )
 
+        frontend_error_message = None
+
         if len(text_augmented) < 10:
             #NOTE: how to send as FastAPI error?
-            logger.error(f"augment_jobopslag_text() returned an unrealistic short text: result{text_augmented = }")
+            message = (
+                "Der kunne ikke trækkes stilliongsbetegnelse, kompetencer eller "
+                "arbejdsopgaver ud af det jobopslag du har indtastet. "
+                "Prøv igen med mere beskrivende jobopslag. "
+                f"ERROR: {text_augmented = }"
+            )
+            logger.error(message)
+            frontend_error_message = message
 
         #TODO:
         # - have trained classifyer model predict on embedding input
@@ -61,9 +82,7 @@ class InferenceClassify():
         # - use streamlit to show a plot of probability distribution interact with
 
         # This is a mock output using the embedding instead
-        return embedding, self.dict_idx_category
-
-
+        return embedding, self.dict_idx_category, frontend_error_message
 
 if __name__ == '__main__':
 

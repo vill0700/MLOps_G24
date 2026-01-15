@@ -18,7 +18,7 @@ async def levetid(app: FastAPI):
 
     del inferencer
     gc.collect()
-    logger.info("succesfully closed. Deleted instance and cleared GPU just in case")
+    logger.info("succesfully closed. Deleted instance of InferenceClassify(). Cleared GPU - just in case")
 
 
 app = FastAPI(lifespan=levetid)
@@ -37,7 +37,7 @@ def health_check():
 @app.get("/classify")
 def predict(jobopslag: str):
 
-    mock_distribution, translate = inferencer.classify(jobopslag)
+    mock_distribution, translate, message = inferencer.classify(jobopslag)
     mock_prediction = translate.get(0,"fail")
 
     prediction = mock_prediction
@@ -48,6 +48,7 @@ def predict(jobopslag: str):
         "prediction": prediction,
         "probability distribution": distribution, #"TODO", #Maybe a new dict of key:values?
         "received text formatted": jobopslag,
+        "frontend_error_message": message,
     }
 
     return response

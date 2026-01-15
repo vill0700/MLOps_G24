@@ -8,10 +8,11 @@ from mlopsg24.api import app
 @st.cache_resource
 def get_localhost_api_client():
     """Create and cache the TestClient instance"""
+
     client = TestClient(app)
+
     client.__enter__()  # Triggers lifespan startup (loads model)
 
-    # Register cleanup to properly close TestClient on app shutdown
     def cleanup():
         try:
             client.__exit__(None, None, None)  # Triggers lifespan shutdown
@@ -22,8 +23,9 @@ def get_localhost_api_client():
 
     return client
 
+
 def call_classification_api(jobopslag: str):
-    client = get_localhost_api_client()
+    client = get_localhost_api_client() #TODO: skift denne ud med gcloud client når den er deployed til cloud
     response = client.get("/classify", params={"jobopslag": jobopslag})
 
     return response.json()
@@ -56,4 +58,7 @@ if __name__ == '__main__':
     if st.button("Klassificer"): #NOTE: gør at kodes køres når knap klikkes
         with st.spinner("Klassificerer jobopslag..."):
             result = call_classification_api(jobopslag_input)
-            st.json(result)
+            if result.get("frontend_error_message"):
+                st.error(result["frontend_error_message"])
+            else:
+                st.json(result)
