@@ -16,14 +16,5 @@ class NeuralNetwork(nn.Module):
             nn.Linear(64, 22),
         )
     def forward(self, x):
-        x = self.model(x)
-        return nn.LogSoftmax(dim=1)(x)
-
-if __name__ == "__main__":
-    model = NeuralNetwork()
-    print(model)
-    
-    # Test with dummy input
-    dummy_input = torch.randn(1, 784)
-    output = model(dummy_input)
-    print(f"Output shape: {output.shape}")
+        logits = self.model(x)
+        return logits
