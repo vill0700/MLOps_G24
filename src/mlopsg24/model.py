@@ -1,31 +1,25 @@
 import torch
 import torch.nn as nn
 
-device = torch.device(
-    "cuda" if torch.cuda.is_available()
-    else "mps" if torch.backends.mps.is_available()
-    else "cpu"
-)
-print(f"Using device: {device}")
+# Check if GPU is available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-#Neural Network for Job Advertisement Classification
+#Neural Network Architecture
 class NeuralNetwork(nn.Module):
-    def __init__(self,input_size=1024, num_classes=22):
-        super().__init__()
-        self.flatten = nn.Flatten()
-
-        self.linear_relu_stack = nn.Sequential(
-            nn.Linear(input_size, 512),
+    def __init__(self):
+        super(NeuralNetwork, self).__init__()
+        self.model = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(784, 256),
             nn.ReLU(),
-            nn.Linear(512, 256),
+            nn.Linear(256, 128),
             nn.ReLU(),
-            nn.Linear(256, num_classes),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 22),
         )
-
     def forward(self, x):
-        x = self.flatten(x)
-        logits = self.linear_relu_stack(x)
-        return logits
+        x = self.model(x)
+        return nn.LogSoftmax(dim=1)(x)
 
 model = NeuralNetwork().to(device)
-print(model)
