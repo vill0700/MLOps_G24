@@ -1,9 +1,6 @@
 import torch
 import torch.nn as nn
 
-# Check if GPU is available
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 #Neural Network Architecture
 class NeuralNetwork(nn.Module):
     def __init__(self):
@@ -22,4 +19,11 @@ class NeuralNetwork(nn.Module):
         x = self.model(x)
         return nn.LogSoftmax(dim=1)(x)
 
-model = NeuralNetwork().to(device)
+if __name__ == "__main__":
+    model = NeuralNetwork()
+    print(model)
+    
+    # Test with dummy input
+    dummy_input = torch.randn(1, 784)
+    output = model(dummy_input)
+    print(f"Output shape: {output.shape}")
