@@ -2,17 +2,17 @@
 # import sys
 # sys.path.append("/data/projects/overvaag/ESHA/mlops_course/MLOps_G24/")
 from fastapi.testclient import TestClient
-from src.mlopsg24.api import api
+from mlopsg24.api import app
 
 
 def test_health_check():
-    with TestClient(api) as client:
+    with TestClient(app) as client:
         response = client.get("/")
         assert response.status_code == 200
         assert response.json() == {'message': 'OK', 'status-code': 200}
 
 def test_predict():
-    with TestClient(api) as client:
+    with TestClient(app) as client:
 
         mock_jobopslag = (
             "Du er pædagog og vant til at arbejde med børn, der har brug for "

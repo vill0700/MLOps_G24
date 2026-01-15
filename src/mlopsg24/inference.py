@@ -3,8 +3,8 @@ from pathlib import Path
 from loguru import logger
 import polars as pl
 
-from .data_create import augment_jobopslag_text
-from .data_preprocess import PreprocessData
+from mlopsg24.data_create import augment_jobopslag_text
+from mlopsg24.data_preprocess import PreprocessData
 
 
 class InferenceClassify():

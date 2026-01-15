@@ -2,7 +2,7 @@ import pytest
 import dataframely as dy
 import polars as pl
 
-from src.mlopsg24.data_preprocess import PreprocessData
+from mlopsg24.data_preprocess import PreprocessData
 
 def test_path_output_creation(tmp_path):
     """
