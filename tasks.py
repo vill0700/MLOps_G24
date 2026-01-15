@@ -4,9 +4,14 @@ from invoke import Context, task
 
 WINDOWS = os.name == "nt"
 PROJECT_NAME = "mlopsg24"
-PYTHON_VERSION = "3.13"
+PYTHON_VERSION = "3.12"
 
 # Project commands
+@task
+def frontend(ctx:Context) -> None:
+    """open a streamlit frontend"""
+    ctx.run(f"uv run streamlit run src/{PROJECT_NAME}/frontend.py", echo=True, pty=not WINDOWS)
+
 @task
 def preprocess_data(ctx: Context) -> None:
     """Preprocess data."""
