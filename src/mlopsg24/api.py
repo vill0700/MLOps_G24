@@ -5,10 +5,10 @@ from http import HTTPStatus
 import torch
 import gc
 
-from .inference import InferenceClassify
+from mlopsg24.inference import InferenceClassify
 
 @asynccontextmanager
-async def levetid(api: FastAPI):
+async def levetid(app: FastAPI):
 
     global inferencer # feels unpythonic to do global variables
     inferencer = InferenceClassify()
@@ -21,10 +21,10 @@ async def levetid(api: FastAPI):
     logger.info("succesfully closed. Deleted instance and cleared GPU just in case")
 
 
-api = FastAPI(lifespan=levetid)
+app = FastAPI(lifespan=levetid)
 
 
-@api.get("/")
+@app.get("/")
 def health_check():
     """ Health check."""
     response = {
@@ -34,7 +34,7 @@ def health_check():
     return response
 
 
-@api.get("/classify")
+@app.get("/classify")
 def predict(jobopslag: str):
 
     mock_distribution, translate = inferencer.classify(jobopslag)

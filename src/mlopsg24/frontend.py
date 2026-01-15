@@ -2,13 +2,13 @@ import streamlit as st
 from fastapi.testclient import TestClient
 import atexit
 
-from mlopsg24.api import api
+from mlopsg24.api import app
 
 
 @st.cache_resource
 def get_localhost_api_client():
     """Create and cache the TestClient instance"""
-    client = TestClient(api)
+    client = TestClient(app)
     client.__enter__()  # Triggers lifespan startup (loads model)
 
     # Register cleanup to properly close TestClient on app shutdown
