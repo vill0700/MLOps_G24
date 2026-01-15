@@ -78,6 +78,24 @@ def _make_model(input_dim: int, num_classes: int, hidden_dim: int | None) -> nn.
     )
 
 
+def _make_modelpy_model(input_dim: int, adapter_dim: int = 784) -> nn.Module:
+    """Use mlopsg24.model.NeuralNetwork without editing model.py.
+
+    model.py currently expects input vectors of length 784 and outputs 22 logits.
+    For text-embedding inputs (e.g., 384-dim or 1024-dim), we add a learnable
+    linear adapter to map to 784.
+    """
+
+    from mlopsg24.model import NeuralNetwork
+
+    if input_dim == adapter_dim:
+        return NeuralNetwork()
+    return nn.Sequential(
+        nn.Linear(input_dim, adapter_dim),
+        NeuralNetwork(),
+    )
+
+
 
 # Creates:
 # - device (CPU/GPU)
@@ -98,10 +116,22 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--batch-size", type=int, default=256)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument(
+        "--arch",
+        choices=["linear", "mlp", "modelpy"],
+        default="linear",
+        help="Model architecture: linear, 1-hidden-layer MLP, or NeuralNetwork from mlopsg24/model.py",
+    )
+    parser.add_argument(
         "--hidden-dim",
         type=int,
         default=0,
-        help="If >0, trains a 1-hidden-layer MLP; if 0, trains a linear classifier",
+        help="Only used for --arch=mlp (hidden layer size).",
+    )
+    parser.add_argument(
+        "--modelpy-adapter-dim",
+        type=int,
+        default=784,
+        help="Only used for --arch=modelpy: dimension to adapt embeddings to before NeuralNetwork.",
     )
     parser.add_argument(
         "--output-model",
@@ -129,8 +159,17 @@ def main(argv: list[str] | None = None) -> None:
         shuffle=False,
     )
 
-    hidden_dim = args.hidden_dim if args.hidden_dim > 0 else None
-    model = _make_model(input_dim=input_dim, num_classes=num_classes, hidden_dim=hidden_dim).to(device)
+    if args.arch == "modelpy":
+        if num_classes != 22:
+            raise ValueError(
+                f"--arch=modelpy requires exactly 22 classes (model.py outputs 22), got num_classes={num_classes}."
+            )
+        model = _make_modelpy_model(input_dim=input_dim, adapter_dim=args.modelpy_adapter_dim).to(device)
+    elif args.arch == "mlp":
+        hidden_dim = args.hidden_dim if args.hidden_dim > 0 else 256
+        model = _make_model(input_dim=input_dim, num_classes=num_classes, hidden_dim=hidden_dim).to(device)
+    else:
+        model = _make_model(input_dim=input_dim, num_classes=num_classes, hidden_dim=None).to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     loss_fn = nn.CrossEntropyLoss()
