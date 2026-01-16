@@ -7,6 +7,7 @@ from loguru import logger
 
 from mlopsg24.inference import InferenceClassify
 
+"""API for job vacancy text classification using FastAPI."""
 
 @asynccontextmanager
 async def levetid(app: FastAPI):
