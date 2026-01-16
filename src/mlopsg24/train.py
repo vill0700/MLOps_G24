@@ -18,8 +18,7 @@ def evaluate(model: nn.Module, loader: DataLoader, device) -> dict:
 
     Returns a dictionary (metrics), currently just with accuracy
     """
-    metrics = {metric: 0 for metric in 
-               ["accuracy", "F1", "precision", "recall", "total"]}
+    metrics = {metric: 0 for metric in ["accuracy", "F1", "precision", "recall", "total"]}
     model.eval()
     counter = 0
     for x, y in loader:
@@ -27,12 +26,13 @@ def evaluate(model: nn.Module, loader: DataLoader, device) -> dict:
         out = model(x)
         metrics["accuracy"] += torch.sum(torch.argmax(out, dim=1) == y).item()
         counter += x.shape[0]
-    
+
     metrics["accuracy"] /= counter
     return metrics
 
+
 def main() -> None:
-    #CLI arguments
+    # CLI arguments
     parser = argparse.ArgumentParser(description="Minimal training loop on precomputed embeddings")
     parser.add_argument(
         "--data-dir",
@@ -49,14 +49,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    #Device selection
+    # Device selection
     if args.device == "auto":
         device_str = "cuda" if torch.cuda.is_available() else "cpu"
     else:
         device_str = args.device
     device = torch.device(device_str)
 
-    #Load preprocessed tensors
+    # Load preprocessed tensors
     x_train_path = args.data_dir / "x_train.pt"
     y_train_path = args.data_dir / "y_train.pt"
     if not (x_train_path.exists() and y_train_path.exists()):
@@ -74,24 +74,26 @@ def main() -> None:
     x_test = torch.load(args.data_dir / "x_test.pt", map_location="cpu")
     y_test = torch.load(args.data_dir / "y_test.pt", map_location="cpu").long()
 
-    #Build classifier model
-    input_dim = int(x_train.shape[1]) # should be 1024
+    # Build classifier model
+    input_dim = int(x_train.shape[1])  # should be 1024
     model = NeuralNetwork()
     model = model.to(device)
 
-    #Training setup
+    # Training setup
     loader = DataLoader(TensorDataset(x_train, y_train), batch_size=DEFAULT_BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
     test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=DEFAULT_LR)
-    train_metrics = {metric: list(0 for i in range(args.epochs)) 
-                     for metric in ["accuracy", "F1", "precision", "recall", "total"]}
-    val_metrics = {metric: list(0 for i in range(args.epochs)) 
-                     for metric in ["accuracy", "F1", "precision", "recall", "total"]}
+    train_metrics = {
+        metric: list(0 for i in range(args.epochs)) for metric in ["accuracy", "F1", "precision", "recall", "total"]
+    }
+    val_metrics = {
+        metric: list(0 for i in range(args.epochs)) for metric in ["accuracy", "F1", "precision", "recall", "total"]
+    }
 
     logger.info("Started training")
-    #Training loop
+    # Training loop
     for epoch in range(args.epochs):
         model.train()
         total = 0.0
@@ -106,7 +108,7 @@ def main() -> None:
             optimizer.step()
             total += float(loss.item())
             counter += x.shape[0]
-        
+
         train_metrics["accuracy"][epoch] /= counter
         val_metric = evaluate(model, val_loader, device)
         for key in val_metric.keys():
@@ -117,14 +119,15 @@ def main() -> None:
 
     test_metrics = evaluate(model, test_loader, device)
 
-    #Save checkpoint
+    # Save checkpoint
     DEFAULT_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     torch.save({"state_dict": model.state_dict(), "input_dim": input_dim}, DEFAULT_OUTPUT)
     logger.info(f"saved_model={DEFAULT_OUTPUT}")
     for name, metrics in zip(["train", "validation", "test"], [train_metrics, val_metrics, test_metrics]):
         logger.debug(f"{name} metrics: {metrics}")
-    
+
     logger.info(f"Final test accuracy was {test_metrics["accuracy"]}")
+
 
 if __name__ == "__main__":
     main()

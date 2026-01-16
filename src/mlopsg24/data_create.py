@@ -1,8 +1,8 @@
-#%%[markdown]
+# %%[markdown]
 # This module is not meant to be run by others than Esben Opstrup,
 # because it requres access to a private database
 # and database credentials stored in the internal package `bmdb``
-#%%
+# %%
 import polars as pl
 import uuid
 from gliner2 import GLiNER2
@@ -12,26 +12,21 @@ from tqdm import tqdm
 import torch
 import html
 
-#Internal package, not publicly avaiable
+# Internal package, not publicly avaiable
 # from bmdb import db_uri
 
 
 def prepare_text(
-    df_jobopslag_raw:pl.DataFrame,
-    model_gliner2:GLiNER2,
+    df_jobopslag_raw: pl.DataFrame,
+    model_gliner2: GLiNER2,
 ) -> pl.DataFrame:
-
     # Non batched version as prototype. Later Vibecode refactored into batched version
-    def entities_to_natural_language(
-        jobopslag_text:str,
-        model_gliner2:GLiNER2
-    ) -> str:
-
+    def entities_to_natural_language(jobopslag_text: str, model_gliner2: GLiNER2) -> str:
         entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
 
         dict_extracted = model_gliner2.extract_entities(
-            text = jobopslag_text,
-            entity_types = entities,
+            text=jobopslag_text,
+            entity_types=entities,
         )
 
         str_natural_language = (
@@ -42,41 +37,26 @@ def prepare_text(
 
         return str_natural_language
 
-
     df_results = (
-
-        df_jobopslag_raw
-
+        df_jobopslag_raw.with_columns(
+            pl.col("ann_id").map_elements(lambda row: str(uuid.uuid4()), return_dtype=pl.String)
+        )
         .with_columns(
-            pl.col('ann_id').map_elements(
-                lambda row: str(uuid.uuid4()),
-                return_dtype=pl.String
+            pl.col("annonce_tekst").map_elements(
+                lambda text: entities_to_natural_language(jobopslag_text=text, model_gliner2=model_gliner2),
+                return_dtype=pl.String,
             )
         )
-
-        .with_columns(
-            pl.col('annonce_tekst').map_elements(
-                lambda text: entities_to_natural_language(
-                    jobopslag_text=text,
-                    model_gliner2=model_gliner2
-                ),
-                return_dtype=pl.String
-            )
-        )
-
         .drop_nulls()
-
-        .filter(
-            pl.col('annonce_tekst').str.len_chars() >= 10
-        )
+        .filter(pl.col("annonce_tekst").str.len_chars() >= 10)
     )
 
     return df_results
 
 
 def augment_jobopslag_text(
-    text:str,
-    model_gliner2:GLiNER2,
+    text: str,
+    model_gliner2: GLiNER2,
 ) -> str:
     """
     Process a single text through GLiNER2 extraction and formatting.
@@ -89,19 +69,19 @@ def augment_jobopslag_text(
         Formatted string with extracted entities or empty string on error
     """
 
-    entities_to_extract:list=["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
+    entities_to_extract: list = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
 
     try:
         dict_extracted = model_gliner2.extract_entities(text, entities_to_extract)
-        entities = dict_extracted.get('entities', {})
+        entities = dict_extracted.get("entities", {})
 
         str_stil = f"{', '.join(entities.get('stillingsbetegnelser', []))}. "
         # str_komp = f"{', '.join(entities.get('kompetencer', []))}. "
         # str_opg = f"{', '.join(entities.get('arbejdsopgaver', []))}. "
 
-        entities_stil = entities.get('stillingsbetegnelser', None)
-        entities_komp = entities.get('kompetencer')
-        entities_opg = entities.get('arbejdsopgaver')
+        entities_stil = entities.get("stillingsbetegnelser", None)
+        entities_komp = entities.get("kompetencer")
+        entities_opg = entities.get("arbejdsopgaver")
 
         if not any([entities_stil, entities_komp, entities_opg]):
             logger.error("FAILED to extract neither stillingsbetegnelser, kompetencer nor arbejdsopgaver")
@@ -113,12 +93,7 @@ def augment_jobopslag_text(
         return ""
 
 
-def prepare_text_bactched(
-    df_jobopslag_raw: pl.DataFrame,
-    model_gliner2: GLiNER2,
-    batch_size: int = 32
-) -> pl.DataFrame:
-
+def prepare_text_bactched(df_jobopslag_raw: pl.DataFrame, model_gliner2: GLiNER2, batch_size: int = 32) -> pl.DataFrame:
     """
     1) GLiNER2 cleans jobopslag text to just the parts of the text expected to be
     good signal for stillingsbetegnelse drop nulls just to make it easier
@@ -148,40 +123,30 @@ def prepare_text_bactched(
     # 3. UUID generation
     uuids = [str(uuid.uuid4()) for _ in range(df_jobopslag_raw.height)]
 
-
     df_cleaned_final = (
-
-        df_jobopslag_raw
-
-        .with_columns([
-
-            # 3. UUIDs
-            pl.Series("ann_id", uuids),
-
-            # Add rewritten text
-            pl.Series("annonce_tekst", results)
-        ])
-
+        df_jobopslag_raw.with_columns(
+            [
+                # 3. UUIDs
+                pl.Series("ann_id", uuids),
+                # Add rewritten text
+                pl.Series("annonce_tekst", results),
+            ]
+        )
         # 4. final clean
         .drop_nulls()
-        .filter(
-            pl.col('annonce_tekst').str.len_chars() > 10
-        )
+        .filter(pl.col("annonce_tekst").str.len_chars() > 10)
         .with_columns(
-            pl.col("annonce_tekst")
-            .map_elements(lambda x: html.unescape(x) if x else x, return_dtype=pl.String)
+            pl.col("annonce_tekst").map_elements(lambda x: html.unescape(x) if x else x, return_dtype=pl.String)
         )
     )
-
 
     return df_cleaned_final
 
 
-
 def pipeline_data_create(
-    path_model_gliner2:Path=Path("models/fastino/gliner2-multi-v1"),
-    path_output:Path=Path("data/raw/training_jobopslag.parquet"),
-    subset_size:int=1000000,
+    path_model_gliner2: Path = Path("models/fastino/gliner2-multi-v1"),
+    path_output: Path = Path("data/raw/training_jobopslag.parquet"),
+    subset_size: int = 1000000,
 ):
     """
     1. Extract data from private database
@@ -220,7 +185,7 @@ def pipeline_data_create(
 
             LIMIT {subset_size}
         """,
-        uri=db_uri()
+        uri=db_uri(),
     )
 
     logger.info("Loading hf model")
@@ -240,13 +205,12 @@ def pipeline_data_create(
     df_cleaned.write_parquet(path_output)
 
     logger.info("Diagnostics")
-    logger.info(df_cleaned.group_by('erhvervsomraade_txt').len().sort(by='len'))
-    df_cleaned.group_by('label').len().to_pandas().plot(kind='hist', bins=100)
+    logger.info(df_cleaned.group_by("erhvervsomraade_txt").len().sort(by="len"))
+    df_cleaned.group_by("label").len().to_pandas().plot(kind="hist", bins=100)
 
 
 if __name__ == "__main__":
-
-    #cannot be run by others than Esben Opstrup
+    # cannot be run by others than Esben Opstrup
     pipeline_data_create()
 
 # %%

@@ -10,16 +10,18 @@ from mlopsg24.data_preprocess import PreprocessData
 # It has nothing to do with the inference module as such
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
-examplevar = os.getenv('EXAMPLEVAR')
+examplevar = os.getenv("EXAMPLEVAR")
 if examplevar:
     logger.info(f".env loaded as  as expected: {os.getenv('EXAMPLEVAR')=}")
 else:
     logger.error(".env did not load properly")
 # ===
 
-class InferenceClassify():
+
+class InferenceClassify:
     """
     This is meant as a inference pipeline, that processes a single datapoint Danish jobopslag.
     Sets up a instance to be run using method 'classify()'.
@@ -28,9 +30,8 @@ class InferenceClassify():
 
     def __init__(
         self,
-        path_model_gliner2:Path=Path("models/fastino/gliner2-multi-v1"), #NOTE: belongs in config
+        path_model_gliner2: Path = Path("models/fastino/gliner2-multi-v1"),  # NOTE: belongs in config
     ) -> None:
-
         self.path_model_gliner2 = path_model_gliner2
 
         # Load HuggingFace text model
@@ -42,18 +43,13 @@ class InferenceClassify():
 
         # load inference map
         dim_idx = pl.read_parquet(Path("data/processed/category_mapping.parquet"))
-        self.dict_idx_category = dict(zip(dim_idx['idx'],dim_idx['categori']))
+        self.dict_idx_category = dict(zip(dim_idx["idx"], dim_idx["categori"]))
 
-
-
-    def classify(self, jobopslag_text:str) :
+    def classify(self, jobopslag_text: str):
         """
         main function
         """
-        text_augmented = augment_jobopslag_text(
-            text=jobopslag_text,
-            model_gliner2 = self.model_gliner2
-        )
+        text_augmented = augment_jobopslag_text(text=jobopslag_text, model_gliner2=self.model_gliner2)
 
         embedding = self.preprocesser.text_embedder.encode(
             sentences=text_augmented,
@@ -66,7 +62,7 @@ class InferenceClassify():
         frontend_error_message = None
 
         if len(text_augmented) < 10:
-            #NOTE: how to send as FastAPI error?
+            # NOTE: how to send as FastAPI error?
             message = (
                 "Der kunne ikke trækkes stilliongsbetegnelse, kompetencer eller "
                 "arbejdsopgaver ud af det jobopslag du har indtastet. "
@@ -76,7 +72,7 @@ class InferenceClassify():
             logger.error(message)
             frontend_error_message = message
 
-        #TODO:
+        # TODO:
         # - have trained classifyer model predict on embedding input
         # - map it to category
         # - use streamlit to show a plot of probability distribution interact with
@@ -84,8 +80,8 @@ class InferenceClassify():
         # This is a mock output using the embedding instead
         return embedding, self.dict_idx_category, frontend_error_message
 
-if __name__ == '__main__':
 
+if __name__ == "__main__":
     jobopslag_example = """
     Vi søger en pædagog, som har lyst til at hjælpe en dreng med at finde ro og støtte i hverdagen. Han er fuld af energi, elsker at være ude i naturen og bliver nysgerrigt optaget af at grave og lede efter smådyr. Han nyder at bygge med Lego, men mister også hurtigt interessen. Han har svært ved at holde koncentrationen, og hans humør kan svinge.
     Drengen har infantil autisme og ADHD og kan reagere på for mange indtryk. Her vil du hjælpe ham med at bevare roen og finde tilbage til sig selv. Han er i øjeblikket ikke i et dagtilbud, hvorfor han og familien har behov for aflastning i dagtimerne.

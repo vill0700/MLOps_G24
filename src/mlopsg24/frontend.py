@@ -25,19 +25,15 @@ def get_localhost_api_client():
 
 
 def call_classification_api(jobopslag: str):
-    client = get_localhost_api_client() #TODO: skift denne ud med gcloud client når den er deployed til cloud
+    client = get_localhost_api_client()  # TODO: skift denne ud med gcloud client når den er deployed til cloud
     response = client.get("/classify", params={"jobopslag": jobopslag})
 
     return response.json()
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     # Streamlit UI Configuration
-    st.set_page_config(
-        page_title="Job Klassifikation",
-        layout="wide"
-    )
+    st.set_page_config(page_title="Job Klassifikation", layout="wide")
 
     st.title("Job Klassifikation Prototype")
     st.markdown("Indtast et jobopslag for at klassificere det til jobtype")
@@ -51,11 +47,10 @@ if __name__ == '__main__':
             "skabe ro og nærvær i relationen og møder barnet med forståelse."
         ),
         height=200,
-        help="Indtast jobopslag tekst her"
+        help="Indtast jobopslag tekst her",
     )
 
-
-    if st.button("Klassificer"): #NOTE: gør at kodes køres når knap klikkes
+    if st.button("Klassificer"):  # NOTE: gør at kodes køres når knap klikkes
         with st.spinner("Klassificerer jobopslag..."):
             result = call_classification_api(jobopslag_input)
             if result.get("frontend_error_message"):
