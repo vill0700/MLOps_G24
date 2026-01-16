@@ -20,6 +20,11 @@ def frontend(ctx: Context) -> None:
 
 
 @task
+def lfrontend(ctx:Context) -> None:
+    """open a localhosted streamlit frontend"""
+    ctx.run(f"uv run streamlit run src/{PROJECT_NAME}/frontend.py -- --localhost", echo=True, pty=not WINDOWS)
+
+@task
 def preprocess_data(ctx: Context) -> None:
     """Preprocess data."""
     ctx.run(f"uv run src/{PROJECT_NAME}/data.py data/raw data/processed", echo=True, pty=not WINDOWS)
