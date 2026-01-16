@@ -2,6 +2,7 @@
 # import sys
 # sys.path.append("/data/projects/overvaag/ESHA/mlops_course/MLOps_G24/")
 from fastapi.testclient import TestClient
+
 from mlopsg24.api import app
 
 

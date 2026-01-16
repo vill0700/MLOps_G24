@@ -2,10 +2,11 @@ import argparse
 from pathlib import Path
 
 import torch
+from loguru import logger
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
+
 from mlopsg24.model import NeuralNetwork
-from loguru import logger
 
 DEFAULT_BATCH_SIZE = 512
 DEFAULT_LR = 1e-3
@@ -115,7 +116,7 @@ def main() -> None:
             val_metrics[key][epoch] = val_metric[key]
 
         train_metrics["total"][epoch] = total / max(1, len(loader))
-        logger.info(f"epoch={epoch + 1} loss={train_metrics["total"][epoch]:.4f}")
+        logger.info(f"epoch={epoch + 1} loss={train_metrics['total'][epoch]:.4f}")
 
     test_metrics = evaluate(model, test_loader, device)
 
@@ -126,7 +127,7 @@ def main() -> None:
     for name, metrics in zip(["train", "validation", "test"], [train_metrics, val_metrics, test_metrics]):
         logger.debug(f"{name} metrics: {metrics}")
 
-    logger.info(f"Final test accuracy was {test_metrics["accuracy"]}")
+    logger.info(f"Final test accuracy was {test_metrics['accuracy']}")
 
 
 if __name__ == "__main__":

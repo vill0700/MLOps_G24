@@ -3,14 +3,15 @@
 # because it requres access to a private database
 # and database credentials stored in the internal package `bmdb``
 # %%
-import polars as pl
+import html
 import uuid
-from gliner2 import GLiNER2
 from pathlib import Path
+
+import polars as pl
+import torch
+from gliner2 import GLiNER2
 from loguru import logger
 from tqdm import tqdm
-import torch
-import html
 
 # Internal package, not publicly avaiable
 # from bmdb import db_uri

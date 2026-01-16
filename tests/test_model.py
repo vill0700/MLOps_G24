@@ -1,4 +1,5 @@
 import torch
+
 from mlopsg24.model import NeuralNetwork
 
 

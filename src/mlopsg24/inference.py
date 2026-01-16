@@ -1,15 +1,15 @@
-from gliner2 import GLiNER2
-from pathlib import Path
-from loguru import logger
-import polars as pl
-
-from mlopsg24.data_create import augment_jobopslag_text
-from mlopsg24.data_preprocess import PreprocessData
-
 # === This is a check that .env can be used for environment variables ===
 # It has nothing to do with the inference module as such
 import os
+from pathlib import Path
+
+import polars as pl
 from dotenv import load_dotenv
+from gliner2 import GLiNER2
+from loguru import logger
+
+from mlopsg24.data_create import augment_jobopslag_text
+from mlopsg24.data_preprocess import PreprocessData
 
 load_dotenv()
 

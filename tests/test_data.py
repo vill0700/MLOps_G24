@@ -1,7 +1,9 @@
-from torch.utils.data import Dataset
 import os
-from mlopsg24.data import MyDataset
+
 import pytest
+from torch.utils.data import Dataset
+
+from mlopsg24.data import MyDataset
 
 file_path = "data/raw"
 

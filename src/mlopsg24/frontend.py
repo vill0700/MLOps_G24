@@ -1,6 +1,7 @@
+import atexit
+
 import streamlit as st
 from fastapi.testclient import TestClient
-import atexit
 
 from mlopsg24.api import app
 

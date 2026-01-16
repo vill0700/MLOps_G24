@@ -1,6 +1,6 @@
-import pytest
 import dataframely as dy
 import polars as pl
+import pytest
 
 from mlopsg24.data_preprocess import PreprocessData
 

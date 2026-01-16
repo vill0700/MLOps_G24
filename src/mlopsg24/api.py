@@ -1,8 +1,9 @@
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
-from loguru import logger
-from http import HTTPStatus
 import gc
+from contextlib import asynccontextmanager
+from http import HTTPStatus
+
+from fastapi import FastAPI
+from loguru import logger
 
 from mlopsg24.inference import InferenceClassify
 
