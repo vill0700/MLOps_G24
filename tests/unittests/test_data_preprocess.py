@@ -73,7 +73,7 @@ def test_validate_extracted_data():
         try:
             schema.validate(df, cast=True)
             return True
-        except:
+        except Exception:
             return False
 
     instance_preprocess = PreprocessData()

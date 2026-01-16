@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from loguru import logger
 from http import HTTPStatus
-import torch
 import gc
 
 from mlopsg24.inference import InferenceClassify
