@@ -8,6 +8,11 @@ PYTHON_VERSION = "3.12"
 
 # Project commands
 @task
+def api(ctx:Context) -> None:
+    """open a FastAPI"""
+    ctx.run(f"uv run uvicorn --reload --port 8000 src.{PROJECT_NAME}.api:app")
+
+@task
 def frontend(ctx:Context) -> None:
     """open a streamlit frontend"""
     ctx.run(f"uv run streamlit run src/{PROJECT_NAME}/frontend.py", echo=True, pty=not WINDOWS)

@@ -1,7 +1,6 @@
 #%%
 from pathlib import Path
 from loguru import logger
-import typer
 import torch
 from sentence_transformers import SentenceTransformer
 import polars as pl
