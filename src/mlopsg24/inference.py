@@ -138,7 +138,6 @@ class InferenceClassify():
             #         "probabilities":probabilities,
             #         }
             # ),
-if __name__ == '__main__':
 
 if __name__ == "__main__":
     jobopslag_example = """
