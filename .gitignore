@@ -1,5 +1,6 @@
 #large files
 models/*
+!models/classifier.pt
 data/*
 
 #just a personal script
