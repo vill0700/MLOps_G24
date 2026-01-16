@@ -4,6 +4,8 @@ from http import HTTPStatus
 import torch
 import gc
 from dataclasses import asdict
+from fastapi import FastAPI
+from loguru import logger
 
 from mlopsg24.inference import InferenceClassify
 
