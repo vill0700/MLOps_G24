@@ -2,13 +2,13 @@ from gliner2 import GLiNER2
 from pathlib import Path
 from loguru import logger
 import polars as pl
+import os
 
 from mlopsg24.data_create import augment_jobopslag_text
 from mlopsg24.data_preprocess import PreprocessData
 
 # === This is a check that .env can be used for environment variables ===
 # It has nothing to do with the inference module as such
-import os
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -28,13 +28,21 @@ class InferenceClassify():
 
     def __init__(
         self,
-        path_model_gliner2:Path=Path("models/fastino/gliner2-multi-v1"), #NOTE: belongs in config
+        name_model_gliner2:str="fastino/gliner2-multi-v1", #NOTE: belongs in config
     ) -> None:
 
-        self.path_model_gliner2 = path_model_gliner2
+        # Use local path if it exists, otherwise use the Hugging Face ID
+        self.path_local_gliner2 = Path("models" / Path(name_model_gliner2))
+
+        self.path_gliner2:str = (
+            str(self.path_local_gliner2)
+            if self.path_local_gliner2.exists()
+            else name_model_gliner2
+        )
+
 
         # Load HuggingFace text model
-        self.model_gliner2 = GLiNER2.from_pretrained(str(self.path_model_gliner2))
+        self.model_gliner2 = GLiNER2.from_pretrained(self.path_gliner2)
 
         # load text embedding model on CPU for inference
         self.preprocesser = PreprocessData()
