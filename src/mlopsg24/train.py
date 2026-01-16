@@ -5,7 +5,7 @@ import torch
 from loguru import logger
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
-
+import wandb
 from mlopsg24.model import NeuralNetwork
 
 DEFAULT_BATCH_SIZE = 512
@@ -182,7 +182,8 @@ def main() -> None:
     parser.add_argument(
         "--plot-confusion-matrix",
         action="store_true",
-        help="If set, writes confusion matrix figure to --fig-dir",
+        default=True,
+        help="If set, writes confusion matrix figure to --fig-dir"
     )
     parser.add_argument(
         "--cm-split",
@@ -197,6 +198,19 @@ def main() -> None:
         help="If set, confusion matrix shows raw counts (default: row-normalized)",
     )
     args = parser.parse_args()
+
+    run = wandb.init(
+    # Set the wandb entity where your project will be logged (generally your team name).
+    entity="g24",
+    # Set the wandb project where this run will be logged.
+    project="my-awesome-project",
+    # Track hyperparameters and run metadata.
+    config={
+        "epochs": args.epochs,
+        "batch_size": DEFAULT_BATCH_SIZE,
+        "lr": DEFAULT_LR,
+    }
+    )
 
     # Device selection
     if args.device == "auto":
@@ -220,6 +234,8 @@ def main() -> None:
     x_val = torch.load(args.data_dir / "x_val.pt", map_location="cpu")
     y_val = torch.load(args.data_dir / "y_val.pt", map_location="cpu").long()
 
+    x_test = torch.load(args.data_dir / "x_val.pt", map_location="cpu")
+    y_test = torch.load(args.data_dir / "y_val.pt", map_location="cpu").long()
 
     # Build classifier model
     input_dim = int(x_train.shape[1])  # should be 1024
@@ -229,6 +245,7 @@ def main() -> None:
     # Training setup
     loader = DataLoader(TensorDataset(x_train, y_train), batch_size=DEFAULT_BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
+    test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=DEFAULT_LR)
     train_loss = [0.0 for _ in range(args.epochs)]
@@ -241,7 +258,7 @@ def main() -> None:
         model.train()
         total = 0.0
         counter = 0
-        for x, y in loader:
+        for i, (x, y) in enumerate(loader):
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad(set_to_none=True)
             out = model(x)
@@ -251,10 +268,18 @@ def main() -> None:
             optimizer.step()
             total += float(loss.item())
             counter += x.shape[0]
+            wandb.log({"train_loss": loss.item()})
+
+            if i % 100 == 0:
+                grads = torch.cat([p.grad.flatten() for p in model.parameters() if p.grad is not None], 0)
+                wandb.log({"gradients": wandb.Histogram(grads.cpu())})
+
 
         train_acc[epoch] /= counter
+        wandb.log({"train_accuracy": train_acc[epoch]})
         val_metric = evaluate(model, val_loader, device)
         val_acc[epoch] = float(val_metric["accuracy"])
+        wandb.log({"val accuracy": val_acc[epoch]})
 
         train_loss[epoch] = total / max(1, len(loader))
         logger.info(f"epoch={epoch + 1} loss={train_loss[epoch]:.4f}")
@@ -291,6 +316,19 @@ def main() -> None:
     torch.save({"state_dict": model.state_dict(), "input_dim": input_dim}, DEFAULT_OUTPUT)
     logger.info(f"saved_model={DEFAULT_OUTPUT}")
 
+    test_metric = evaluate(model, test_loader, device)
+    final_accuracy = test_metric["accuracy"]
+
+    wandb.log({"final_image": wandb.Image(str(cm_path))})
+    torch.save(model.state_dict(), "model.pth")
+    artifact = wandb.Artifact(
+        name="job_classifier",
+        type="model",
+        description="Job classification model on job texts",
+        metadata={"test accuracy": final_accuracy},
+    )
+    artifact.add_file("model.pth")
+    run.log_artifact(artifact)
 
 if __name__ == "__main__":
     main()
