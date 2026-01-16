@@ -1,7 +1,6 @@
-# %%
+#%%
 from pathlib import Path
 from loguru import logger
-import typer
 import torch
 from sentence_transformers import SentenceTransformer
 import polars as pl
@@ -10,24 +9,26 @@ from tqdm import tqdm
 import numpy as np
 
 
-class PreprocessData:
+class PreprocessData():
+
     def __init__(
         self,
-        path_text_embedder: str | Path = Path("models/intfloat/multilingual-e5-large-instruct"),
+        path_text_embedder: str|Path = Path("models/intfloat/multilingual-e5-large-instruct"),
         file_data_raw: Path = Path("data/raw/training_jobopslag.parquet"),
         test_size: float = 0.2,
         val_size: float = 0.1,
         random_state: int = 42,
-        batch_size: int = 32,
+        batch_size:int=32,
         path_output: Path = Path("data/processed"),
-        column_target_class: str = "erhvervsomraade_txt",
-        column_text: str = "annonce_tekst",
-        embedding_prefix: str = (
+        column_target_class:str= "erhvervsomraade_txt",
+        column_text:str= "annonce_tekst",
+        embedding_prefix:str=(
             "query: "
             "Classify the following extracted texts of occupation, skills "
             "and tasks from a Danish job vacancy into job category"
         ),
     ) -> None:
+
         self.path_text_embedder = path_text_embedder
         self.file_data_raw = file_data_raw
         self.test_size = test_size
@@ -51,7 +52,8 @@ class PreprocessData:
         logger.info(f"Reading data from {self.file_data_raw}")
         self.df_jobopslag = pl.read_parquet(self.file_data_raw)
 
-    def init_text_embedder(self, gpu: bool = True):
+
+    def init_text_embedder(self, gpu:bool=True):
         """
         Initialize SentenceTransformer model for text embeddings.
         Default tries to use GPU
@@ -59,8 +61,8 @@ class PreprocessData:
         logger.info(f"Loading text embedder from {self.path_text_embedder}")
 
         self.text_embedder = SentenceTransformer(
-            model_name_or_path=str(self.path_text_embedder),
-            device="cuda" if (torch.cuda.is_available() and gpu) else "cpu",
+            model_name_or_path = str(self.path_text_embedder),
+            device='cuda' if (torch.cuda.is_available() and gpu) else 'cpu',
         )
 
     def create_x_features(self):
@@ -69,7 +71,12 @@ class PreprocessData:
         Processes in batches to manage GPU memory efficiently.
         """
 
-        list_sentences = self.df_jobopslag.select(self.column_text).to_series().to_list()
+        list_sentences = (
+            self.df_jobopslag
+            .select(self.column_text)
+            .to_series()
+            .to_list()
+        )
 
         logger.info(f"Creating embeddings for {len(list_sentences)} observations in batches of {self.batch_size}")
 
@@ -80,9 +87,12 @@ class PreprocessData:
         num_batches = (len(list_sentences) + self.batch_size - 1) // self.batch_size
 
         # Process in batches with progress bar
-        for i in tqdm(range(0, len(list_sentences), self.batch_size), desc="Creating embeddings", total=num_batches):
+        for i in tqdm(range(0, len(list_sentences), self.batch_size),
+                      desc="Creating embeddings",
+                      total=num_batches):
+
             # Get current batch
-            batch_sentences = list_sentences[i : i + self.batch_size]
+            batch_sentences = list_sentences[i:i + self.batch_size]
 
             # Generate embeddings for batch
             batch_embeddings = self.text_embedder.encode(
@@ -107,32 +117,42 @@ class PreprocessData:
 
         logger.info(f"x features embeddings shape: {self.x_features.shape}")
 
+
     def create_y_target(self):
         """
         Create categorical y target features
         Saves mapping of y idx to classes to parquet table
         """
 
-        y_categories = self.df_jobopslag.select(self.column_target_class).to_series()
+        y_categories = (
+            self.df_jobopslag
+            .select(self.column_target_class)
+            .to_series()
+        )
 
         # Create mapping from categories to indices
         unique_categories = y_categories.unique().sort()
         category_to_idx = {cat: idx for idx, cat in enumerate(unique_categories)}
 
         # Convert to tensor
-        self.y_targets = torch.tensor([category_to_idx[cat] for cat in y_categories.to_list()], dtype=torch.long)
+        self.y_targets = torch.tensor(
+            [category_to_idx[cat] for cat in y_categories.to_list()],
+            dtype=torch.long
+        )
 
         # save mapping of categories
         (
             pl.DataFrame(
                 data=list(category_to_idx.items()),
                 schema=("categori", "idx"),
-                orient="row",
-            ).write_parquet(self.path_output / "category_mapping.parquet")
+                orient='row',
+                )
+            .write_parquet(self.path_output / "category_mapping.parquet")
         )
 
         logger.info(f"Targets shape: {self.y_targets.shape}")
         logger.info(f"Number of classes: {len(unique_categories)}")
+
 
     def split_data(self) -> None:
         """
@@ -141,23 +161,26 @@ class PreprocessData:
         logger.info("Splitting data into train/val/test sets")
 
         x_temp, self.x_test, y_temp, self.y_test = train_test_split(
-            self.x_features,
-            self.y_targets,
+            self.x_features, self.y_targets,
             test_size=self.test_size,
             random_state=self.random_state,
-            stratify=self.y_targets,  # Maintain class distribution
+            stratify=self.y_targets  # Maintain class distribution
         )
 
         # Second split: separate validation from training
         # Adjust val_size relative to temp size to ensure equal distribution
         val_size_adjusted = self.val_size / (1 - self.test_size)
         self.x_train, self.x_val, self.y_train, self.y_val = train_test_split(
-            x_temp, y_temp, test_size=val_size_adjusted, random_state=self.random_state, stratify=y_temp
+            x_temp, y_temp,
+            test_size=val_size_adjusted,
+            random_state=self.random_state,
+            stratify=y_temp
         )
 
         logger.info(f"Train set: {self.x_train.shape[0]} samples")
         logger.info(f"Validation set: {self.x_val.shape[0]} samples")
         logger.info(f"Test set: {self.x_test.shape[0]} samples")
+
 
     def save_data(self) -> None:
         """
@@ -173,6 +196,7 @@ class PreprocessData:
         torch.save(self.y_test, self.path_output / "y_test.pt")
 
         logger.info(f"All tensors saved successfully to {self.path_output}")
+
 
     def main(self):
         """
