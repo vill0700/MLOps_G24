@@ -7,10 +7,21 @@ import polars as pl
 from dotenv import load_dotenv
 from gliner2 import GLiNER2
 from loguru import logger
+import polars as pl
+import os
+import torch
+import torch.nn.functional as F
+from dataclasses import dataclass
 
 from mlopsg24.data_create import augment_jobopslag_text
 from mlopsg24.data_preprocess import PreprocessData
+from mlopsg24.train import DEFAULT_OUTPUT
+from mlopsg24.model import NeuralNetwork
 
+
+# === This is a check that .env can be used for environment variables ===
+# It has nothing to do with the inference module as such
+from dotenv import load_dotenv
 load_dotenv()
 
 examplevar = os.getenv("EXAMPLEVAR")
@@ -21,7 +32,15 @@ else:
 # ===
 
 
-class InferenceClassify:
+@dataclass
+class DataPrediction:
+    categori_label:str
+    categori_idx:int
+    probability_distribution:list[int]
+    frontend_error_message:str
+
+
+class InferenceClassify():
     """
     This is meant as a inference pipeline, that processes a single datapoint Danish jobopslag.
     Sets up a instance to be run using method 'classify()'.
@@ -30,56 +49,96 @@ class InferenceClassify:
 
     def __init__(
         self,
-        path_model_gliner2: Path = Path("models/fastino/gliner2-multi-v1"),  # NOTE: belongs in config
+        name_model_gliner2:str="fastino/gliner2-multi-v1", #NOTE: belongs in config
     ) -> None:
-        self.path_model_gliner2 = path_model_gliner2
+
+        # Use local path if it exists, otherwise use the Hugging Face ID
+        self.path_local_gliner2 = Path("models" / Path(name_model_gliner2))
+
+        self.path_gliner2:str = (
+            str(self.path_local_gliner2)
+            if self.path_local_gliner2.exists()
+            else name_model_gliner2
+        )
+
 
         # Load HuggingFace text model
-        self.model_gliner2 = GLiNER2.from_pretrained(str(self.path_model_gliner2))
+        self.model_extractor = GLiNER2.from_pretrained(self.path_gliner2)
 
         # load text embedding model on CPU for inference
-        self.preprocesser = PreprocessData()
-        self.preprocesser.init_text_embedder(gpu=False)
+        self.model_preprocesser = PreprocessData()
+        self.model_preprocesser.init_text_embedder(gpu=False)
 
         # load inference map
         dim_idx = pl.read_parquet(Path("data/processed/category_mapping.parquet"))
         self.dict_idx_category = dict(zip(dim_idx["idx"], dim_idx["categori"]))
 
-    def classify(self, jobopslag_text: str):
+        # load trained classifier to eval mode and cpu
+        self.model_classifier = NeuralNetwork()
+        state_dict = torch.load(DEFAULT_OUTPUT)['state_dict']
+        self.model_classifier.load_state_dict(state_dict)
+        self.model_classifier.eval()
+
+        logger.info(
+            "\nLoaded ML models should all be on cpu:"
+            f"\n{self.model_extractor.device = }"
+            f"\n{self.model_preprocesser.text_embedder.device = }"
+            f"\n{next(self.model_classifier.parameters()).device = }"
+        )
+
+
+    def classify(self, jobopslag_text:str) -> DataPrediction:
         """
         main function
         """
-        text_augmented = augment_jobopslag_text(text=jobopslag_text, model_gliner2=self.model_gliner2)
+        text_augmented = augment_jobopslag_text(
+            text=jobopslag_text,
+            model_gliner2 = self.model_extractor
+        )
 
-        embedding = self.preprocesser.text_embedder.encode(
+        embedding = self.model_preprocesser.text_embedder.encode(
             sentences=text_augmented,
             convert_to_tensor=True,
             show_progress_bar=False,
-            prompt=self.preprocesser.embedding_prefix,
+            prompt=self.model_preprocesser.embedding_prefix,
             normalize_embeddings=True,
         )
 
-        frontend_error_message = None
-
+        message = None
         if len(text_augmented) < 10:
-            # NOTE: how to send as FastAPI error?
+            # message to be passed on to API and Frontend
             message = (
-                "Der kunne ikke trækkes stilliongsbetegnelse, kompetencer eller "
+                "Der kunne ikke trækkes stillingsbetegnelse, kompetencer eller "
                 "arbejdsopgaver ud af det jobopslag du har indtastet. "
                 "Prøv igen med mere beskrivende jobopslag. "
                 f"ERROR: {text_augmented = }"
             )
             logger.error(message)
-            frontend_error_message = message
 
-        # TODO:
-        # - have trained classifyer model predict on embedding input
-        # - map it to category
-        # - use streamlit to show a plot of probability distribution interact with
 
-        # This is a mock output using the embedding instead
-        return embedding, self.dict_idx_category, frontend_error_message
 
+        with torch.no_grad():
+            nn_output = self.model_classifier(embedding)
+
+        predicted_class_idx = torch.argmax(nn_output).item()
+
+        probabilities = F.softmax(nn_output, dim=0).detach().cpu().tolist()
+
+        return DataPrediction(
+            categori_label=self.dict_idx_category[predicted_class_idx],
+            categori_idx=predicted_class_idx,
+            probability_distribution = probabilities,
+            frontend_error_message=message,
+        )
+
+
+            # df_probability_distribution = pl.DataFrame(
+            #     data={
+            #         "category":self.dict_idx_category.values(),
+            #         "probabilities":probabilities,
+            #         }
+            # ),
+if __name__ == '__main__':
 
 if __name__ == "__main__":
     jobopslag_example = """

@@ -1,9 +1,9 @@
 import gc
 from contextlib import asynccontextmanager
 from http import HTTPStatus
-
-from fastapi import FastAPI
-from loguru import logger
+import torch
+import gc
+from dataclasses import asdict
 
 from mlopsg24.inference import InferenceClassify
 
@@ -36,19 +36,6 @@ def health_check():
 
 
 @app.get("/classify")
-def predict(jobopslag: str):
-    mock_distribution, translate, message = inferencer.classify(jobopslag)
-    mock_prediction = translate.get(0, "fail")
-
-    prediction = mock_prediction
-
-    distribution = {translate.get(idx, "mapfail"): float(prop) for idx, prop in enumerate(mock_distribution[:22])}
-
-    response = {
-        "prediction": prediction,
-        "probability distribution": distribution,  # "TODO", #Maybe a new dict of key:values?
-        "received text formatted": jobopslag,
-        "frontend_error_message": message,
-    }
-
-    return response
+def predict(jobopslag: str) -> dict:
+    dataclass_prediction = inferencer.classify(jobopslag)
+    return asdict(dataclass_prediction)

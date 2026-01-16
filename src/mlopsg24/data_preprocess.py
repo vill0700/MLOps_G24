@@ -5,6 +5,7 @@ import numpy as np
 import polars as pl
 import torch
 from loguru import logger
+import torch
 from sentence_transformers import SentenceTransformer
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
@@ -13,11 +14,11 @@ from tqdm import tqdm
 class PreprocessData:
     """
     Preprocessing pipeline for job vacancy text classification.
-    
-    Handles loading raw job posting data, creating text embeddings using 
-    SentenceTransformer, preparing categorical targets, and splitting data 
+
+    Handles loading raw job posting data, creating text embeddings using
+    SentenceTransformer, preparing categorical targets, and splitting data
     into train/validation/test sets for model training.
-    
+
     Attributes:
         path_text_embedder: Path to the SentenceTransformer model
         file_data_raw: Path to raw parquet data file
