@@ -130,25 +130,25 @@ def evaluate(model: nn.Module, loader: DataLoader, device) -> dict:
 
 def main() -> None:
     """Main training loop for the neural network classifier.
-    
+
     Loads preprocessed embeddings and labels, trains a NeuralNetwork model
     on the training set, evaluates on validation and test sets, and saves
     the trained model checkpoint.
-    
+
     CLI Arguments:
         --data-dir: Path to folder containing preprocessed tensors (x_train.pt, y_train.pt, etc.)
                     Default: "data/processed"
         --epochs: Number of training epochs. Default: 1
-        --device: Device to train on ('auto', 'cpu', or 'cuda'). 
+        --device: Device to train on ('auto', 'cpu', or 'cuda').
                   'auto' selects cuda if available, else cpu. Default: 'auto'
-    
+
     Raises:
-        FileNotFoundError: If required preprocessed data files (x_train.pt, y_train.pt) 
+        FileNotFoundError: If required preprocessed data files (x_train.pt, y_train.pt)
                           are not found in the specified data directory.
-    
+
     Returns:
         None
-        
+
     Side Effects:
         - Trains the model and logs metrics at each epoch
         - Saves trained model state_dict to 'models/classifier.pt'
