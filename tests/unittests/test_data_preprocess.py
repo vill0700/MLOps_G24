@@ -5,6 +5,10 @@ import pytest
 from mlopsg24.data_preprocess import PreprocessData
 
 
+def test_dummy():
+    "This is just a dummy to see if github workflows is triggered"
+    assert 1==1
+
 def test_path_output_creation(tmp_path):
     """
     Test that the output directory is created if it does not exist
