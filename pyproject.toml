@@ -49,6 +49,7 @@ dev = [
     "ruff==0.14.11",
     "mkdocstrings-python==2.0.1",
     "dotenv>=0.9.9",
+    "ty>=0.0.12",
 ]
 
 
