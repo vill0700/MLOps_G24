@@ -1,11 +1,25 @@
-# NOTE:DEV
-# import sys
-# sys.path.append("/data/projects/overvaag/ESHA/mlops_course/MLOps_G24/")
+import pytest
 from fastapi.testclient import TestClient
+from pathlib import Path
 
 from mlopsg24.api import app
 
 
+path_gliner2 = Path("models/fastino/gliner2-multi-v1")
+path_e5 = Path("models/intfloat/multilingual-e5-large-instruct")
+
+pretrained_models_available = all((
+    Path("models/fastino/gliner2-multi-v1").exists(),
+    Path("models/intfloat/multilingual-e5-large-instruct").exists(),
+))
+
+@pytest.mark.skipif(
+    not pretrained_models_available,
+    reason=(
+        "pretrained huggingface text models are not available."
+        "github does not have access to data file so CI will fail"
+    ),
+)
 def test_health_check():
     with TestClient(app) as client:
         response = client.get("/")
@@ -13,6 +27,13 @@ def test_health_check():
         assert response.json() == {"message": "OK", "status-code": 200}
 
 
+@pytest.mark.skipif(
+    not pretrained_models_available,
+    reason=(
+        "pretrained huggingface text models are not available."
+        "github does not have access to data file so CI will fail"
+    ),
+)
 def test_predict():
     with TestClient(app) as client:
         mock_jobopslag = (

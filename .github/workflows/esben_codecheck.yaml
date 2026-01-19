@@ -3,10 +3,10 @@ name: ruff codestyle check
 on:
   push:
     branches:
-      - esbenx
+      # - esben
   pull_request:
     branches:
-      - esbenx
+      # - esben
 
 jobs:
   ruff:
