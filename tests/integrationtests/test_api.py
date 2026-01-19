@@ -1,9 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
 from pathlib import Path
 
-from mlopsg24.api import app
+import pytest
+from fastapi.testclient import TestClient
 
+from mlopsg24.api import app
 
 path_gliner2 = Path("models/fastino/gliner2-multi-v1")
 path_e5 = Path("models/intfloat/multilingual-e5-large-instruct")

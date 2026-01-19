@@ -5,7 +5,6 @@ import numpy as np
 import polars as pl
 import torch
 from loguru import logger
-import torch
 from sentence_transformers import SentenceTransformer
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm

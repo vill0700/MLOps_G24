@@ -1,12 +1,13 @@
-import atexit
 import argparse
-import streamlit as st
-from fastapi.testclient import TestClient
 import atexit
-import polars as pl
 from pathlib import Path
 
+import polars as pl
+import streamlit as st
+from fastapi.testclient import TestClient
+
 from mlopsg24.api import app
+
 
 @st.cache_resource
 def get_localhost_api_client():
