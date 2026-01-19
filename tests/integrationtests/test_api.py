@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from mlopsg24.api import app
+from mlopsg24.inference import DataPrediction
 
 path_gliner2 = Path("models/fastino/gliner2-multi-v1")
 path_e5 = Path("models/intfloat/multilingual-e5-large-instruct")
@@ -44,5 +45,9 @@ def test_predict():
 
         response = client.get("/classify", params={"jobopslag": mock_jobopslag})
 
-        assert isinstance(response.json()["prediction"], str)
-        assert len(response.json()["probability distribution"]) == 22
+        assert isinstance(response.json()["categori_label"], str)
+        assert len(response.json()["probability_distribution"]) == 22 , \
+            "tests that there are 22 classes in the probability distribution"
+        assert sum(response.json()["probability_distribution"]) > 0.9999, \
+            "tests that the probability distributions sums to almost 100% -\
+            why? hint: statistics and floating point numbers"
