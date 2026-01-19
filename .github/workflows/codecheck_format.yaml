@@ -1,14 +1,14 @@
-name: "Unit and integration tests"
+name: "Ruff codestyle check and auto formatter"
 
 on:
   push:
-    branches: [ esben, main ]
+    branches: esben
+    # branches: [ esben, main ]
   pull_request:
-    branches: [ esben, main ]
-
+    # branches: [ esben, main ]
 
 jobs:
-  ci-tests:
+  ruff:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -29,6 +29,10 @@ jobs:
       run: |
         uv sync --dev --locked
 
-    - name: Test with pytest
-      run: |
-        uv run pytest -v
+    - name: Ruff check
+      run: uv run ruff check .
+
+    - name: Ruff format
+      run: uv run ruff format .
+      #NOTE: ruff is in configured in pyproject.toml to only do check on autosort
+      # of imports. In a more rigorous setup the rules should be expanded
