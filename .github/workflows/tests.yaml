@@ -1,46 +1,34 @@
-name: Unit and integration test
+name: "Run tests"
 
 on:
   push:
-    branches: x
-    # branches: [main, esben]
+    branches: esben
   pull_request:
-    branches: x
+    # branches: [ master, main ]
+
 
 jobs:
-  esben_test:
-    runs-on: ${{ matrix.operating-system }}
+  build:
+    runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false # Don't cancel all tests if one OS fails
+      fail-fast: false
       matrix:
-        operating-system: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        python-version: ["3.11", "3.12"]
-
-    env:
-      # This forces all OSs to use a predictable cache location
-      HF_HOME: ${{ runner.temp }}/huggingface_cache
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
 
     steps:
-      - name: Checkout to branch
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v5
 
-      - name: Setup uv with cache
-        uses: astral-sh/setup-uv@v7
-        with:
-          python-version: ${{ matrix.python-version }} # Use the matrix version!
-          enable-cache: true
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        python-version: 3.12
+        enable-cache: true
 
-      - name: Cache Hugging Face models
-        uses: actions/cache@v4
-        with:
-          # Use the env variable we defined above
-          path: ${{ github.workspace }}/.cache/huggingface
-          key: ${{ runner.os }}-hf-${{ hashFiles('**/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-hf-
+    - name: Install dependencies
+      run: |
+        uv sync --dev --locked
 
-      - name: Install dependencies
-        run: uv sync --dev --locked
-
-      - name: Test with pytest
-        run: uv run pytest
+    - name: Test with pytest
+      run: |
+        uv run pytest -v
