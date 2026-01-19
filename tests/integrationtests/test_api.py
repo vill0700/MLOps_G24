@@ -13,13 +13,13 @@ pretrained_models_available = all((
     Path("models/intfloat/multilingual-e5-large-instruct").exists(),
 ))
 
-# @pytest.mark.skipif(
-#     not pretrained_models_available,
-#     reason=(
-#         "pretrained huggingface text models are not available."
-#         "github does not have access to data file so CI will fail"
-#     ),
-# )
+@pytest.mark.skipif(
+    not pretrained_models_available,
+    reason=(
+        "pretrained huggingface text models are not available."
+        "github does not have access to data file so CI will fail"
+    ),
+)
 def test_health_check():
     with TestClient(app) as client:
         response = client.get("/")
