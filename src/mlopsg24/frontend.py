@@ -62,7 +62,7 @@ if __name__ == '__main__':
     jobopslag_input = st.text_area(
         "Jobopslag tekst:",
         value=(
-            "Dette er et eksempel:"
+            "Dette er et eksempel: "
             "Du er pædagog og vant til at arbejde med børn, der har brug for "
             "tydelige rammer og forudsigelighed i hverdagen. Du formår at "
             "skabe ro og nærvær i relationen og møder barnet med forståelse."

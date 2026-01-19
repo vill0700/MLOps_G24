@@ -14,13 +14,16 @@ from mlopsg24.inference import InferenceClassify, DataPrediction
 
 @asynccontextmanager
 async def levetid(app: FastAPI):
-    global inferencer  # feels unpythonic to do global variables
-    inferencer = InferenceClassify()
-    logger.info("instance of InferenceClassify() loaded")
+    """
+    - Loads a pretrained hugginfae model into FastAPI once at first call.
+    - At shutdown of API, the hf model is deleted and memory is released.
+    """
+    app.state.inferencer = InferenceClassify()
+    logger.info("instance of InferenceClassify() loaded into FastAPI app.state")
 
     yield
 
-    del inferencer
+    del app.state.inferencer
     gc.collect()
     logger.info("succesfully closed. Deleted instance of InferenceClassify(). Cleared GPU - just in case")
 
@@ -56,7 +59,7 @@ def predict(jobopslag: str, background_task:BackgroundTasks) -> dict:
     Return a json/dict to the user
     """
 
-    dataclass_prediction = inferencer.classify(jobopslag)
+    dataclass_prediction = app.state.inferencer.classify(jobopslag)
 
     background_task.add_task(add_to_database, dataclass_prediction, jobopslag)
 
