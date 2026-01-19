@@ -1,27 +1,21 @@
-# === This is a check that .env can be used for environment variables ===
-# It has nothing to do with the inference module as such
 import os
+from dataclasses import dataclass
 from pathlib import Path
 
 import polars as pl
+import torch
+import torch.nn.functional as F
 from dotenv import load_dotenv
 from gliner2 import GLiNER2
 from loguru import logger
-import polars as pl
-import os
-import torch
-import torch.nn.functional as F
-from dataclasses import dataclass
 
 from mlopsg24.data_create import augment_jobopslag_text
 from mlopsg24.data_preprocess import PreprocessData
-from mlopsg24.train import DEFAULT_OUTPUT
 from mlopsg24.model import NeuralNetwork
-
+from mlopsg24.train import DEFAULT_OUTPUT
 
 # === This is a check that .env can be used for environment variables ===
 # It has nothing to do with the inference module as such
-from dotenv import load_dotenv
 load_dotenv()
 
 examplevar = os.getenv("EXAMPLEVAR")
@@ -34,13 +28,13 @@ else:
 
 @dataclass
 class DataPrediction:
-    categori_label:str
-    categori_idx:int
-    probability_distribution:list[int]
-    frontend_error_message:str
+    categori_label: str
+    categori_idx: int
+    probability_distribution: list[int]
+    frontend_error_message: str
 
 
-class InferenceClassify():
+class InferenceClassify:
     """
     This is meant as a inference pipeline, that processes a single datapoint Danish jobopslag.
     Sets up a instance to be run using method 'classify()'.
@@ -49,18 +43,14 @@ class InferenceClassify():
 
     def __init__(
         self,
-        name_model_gliner2:str="fastino/gliner2-multi-v1", #NOTE: belongs in config
+        name_model_gliner2: str = "fastino/gliner2-multi-v1",  # NOTE: belongs in config
     ) -> None:
-
         # Use local path if it exists, otherwise use the Hugging Face ID
         self.path_local_gliner2 = Path("models" / Path(name_model_gliner2))
 
-        self.path_gliner2:str = (
-            str(self.path_local_gliner2)
-            if self.path_local_gliner2.exists()
-            else name_model_gliner2
+        self.path_gliner2: str = (
+            str(self.path_local_gliner2) if self.path_local_gliner2.exists() else name_model_gliner2
         )
-
 
         # Load HuggingFace text model
         self.model_extractor = GLiNER2.from_pretrained(self.path_gliner2)
@@ -75,7 +65,7 @@ class InferenceClassify():
 
         # load trained classifier to eval mode and cpu
         self.model_classifier = NeuralNetwork()
-        state_dict = torch.load(DEFAULT_OUTPUT)['state_dict']
+        state_dict = torch.load(DEFAULT_OUTPUT)["state_dict"]
         self.model_classifier.load_state_dict(state_dict)
         self.model_classifier.eval()
 
@@ -86,15 +76,11 @@ class InferenceClassify():
             f"\n{next(self.model_classifier.parameters()).device = }"
         )
 
-
-    def classify(self, jobopslag_text:str) -> DataPrediction:
+    def classify(self, jobopslag_text: str) -> DataPrediction:
         """
         main function
         """
-        text_augmented = augment_jobopslag_text(
-            text=jobopslag_text,
-            model_gliner2 = self.model_extractor
-        )
+        text_augmented = augment_jobopslag_text(text=jobopslag_text, model_gliner2=self.model_extractor)
 
         embedding = self.model_preprocesser.text_embedder.encode(
             sentences=text_augmented,
@@ -115,8 +101,6 @@ class InferenceClassify():
             )
             logger.error(message)
 
-
-
         with torch.no_grad():
             nn_output = self.model_classifier(embedding)
 
@@ -127,17 +111,17 @@ class InferenceClassify():
         return DataPrediction(
             categori_label=self.dict_idx_category[predicted_class_idx],
             categori_idx=predicted_class_idx,
-            probability_distribution = probabilities,
+            probability_distribution=probabilities,
             frontend_error_message=message,
         )
 
+        # df_probability_distribution = pl.DataFrame(
+        #     data={
+        #         "category":self.dict_idx_category.values(),
+        #         "probabilities":probabilities,
+        #         }
+        # ),
 
-            # df_probability_distribution = pl.DataFrame(
-            #     data={
-            #         "category":self.dict_idx_category.values(),
-            #         "probabilities":probabilities,
-            #         }
-            # ),
 
 if __name__ == "__main__":
     jobopslag_example = """
