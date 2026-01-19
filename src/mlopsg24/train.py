@@ -117,11 +117,12 @@ def evaluate(model: nn.Module, loader: DataLoader, device) -> dict:
     metrics = {metric: 0 for metric in ["accuracy", "F1", "precision", "recall", "total"]}
     model.eval()
     counter = 0
-    for x, y in loader:
-        x, y = x.to(device), y.to(device)
-        out = model(x)
-        metrics["accuracy"] += torch.sum(torch.argmax(out, dim=1) == y).item()
-        counter += x.shape[0]
+    with torch.no_grad():
+        for x, y in loader:
+            x, y = x.to(device), y.to(device)
+            out = model(x)
+            metrics["accuracy"] += torch.sum(torch.argmax(out, dim=1) == y).item()
+            counter += x.shape[0]
 
     metrics["accuracy"] /= counter
     return metrics
@@ -246,7 +247,7 @@ def main() -> None:
     loader = DataLoader(TensorDataset(x_train, y_train), batch_size=DEFAULT_BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
     test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
-    loss_fn = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=DEFAULT_LR)
     train_loss = [0.0 for _ in range(args.epochs)]
     train_acc = [0.0 for _ in range(args.epochs)]
@@ -263,7 +264,7 @@ def main() -> None:
             optimizer.zero_grad(set_to_none=True)
             out = model(x)
             train_acc[epoch] += torch.sum(torch.argmax(out, dim=1) == y).item()
-            loss = loss_fn(out, y)
+            loss = criterion(out, y)
             loss.backward()
             optimizer.step()
             total += float(loss.item())
@@ -274,12 +275,11 @@ def main() -> None:
                 grads = torch.cat([p.grad.flatten() for p in model.parameters() if p.grad is not None], 0)
                 wandb.log({"gradients": wandb.Histogram(grads.cpu())})
 
-
         train_acc[epoch] /= counter
         wandb.log({"train_accuracy": train_acc[epoch]})
         val_metric = evaluate(model, val_loader, device)
         val_acc[epoch] = float(val_metric["accuracy"])
-        wandb.log({"val accuracy": val_acc[epoch]})
+        wandb.log({"val_accuracy": val_acc[epoch]})
 
         train_loss[epoch] = total / max(1, len(loader))
         logger.info(f"epoch={epoch + 1} loss={train_loss[epoch]:.4f}")
