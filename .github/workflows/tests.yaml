@@ -2,9 +2,10 @@ name: Unit and integration test
 
 on:
   push:
-    branches: [main, esben]
+    branches: x
+    # branches: [main, esben]
   pull_request:
-    branches: [main, esben]
+    branches: x
 
 jobs:
   esben_test:
