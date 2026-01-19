@@ -1,4 +1,4 @@
-name: "Ruff codestyle check and auto formatter"
+name: "Ruff codestyle check - expected to fail"
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ esben, main ]
 
 jobs:
-  ruff-should-fail:
+  ruff-check:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

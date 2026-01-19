@@ -1,12 +1,13 @@
-import atexit
 import argparse
-import streamlit as st
-from fastapi.testclient import TestClient
 import atexit
-import polars as pl
 from pathlib import Path
 
+import polars as pl
+import streamlit as st
+from fastapi.testclient import TestClient
+
 from mlopsg24.api import app
+
 
 @st.cache_resource
 def get_localhost_api_client():
@@ -26,13 +27,12 @@ def get_localhost_api_client():
 
     return client
 
-def call_classification_api(jobopslag: str, localhost:bool=False) -> dict:
 
+def call_classification_api(jobopslag: str, localhost:bool=False) -> dict:
     if localhost:
         client = get_localhost_api_client()
     else:
         client = get_localhost_api_client() #TODO: skift denne ud med gcloud client når den er deployed til cloud
-
     response = client.get("/classify", params={"jobopslag": jobopslag})
     return response.json()
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
 
     # load inference map
-    # NOTE: should be defined central instead
+    # NOTE: should be defined central instead in a config
     category_mapping = pl.read_parquet(Path("data/processed/category_mapping.parquet"))
 
     # Streamlit UI Configuration
