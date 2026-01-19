@@ -33,7 +33,7 @@ def call_classification_api(jobopslag: str, localhost:bool=False) -> dict:
         client = get_localhost_api_client()
     else:
         client = get_localhost_api_client() #TODO: skift denne ud med gcloud client når den er deployed til cloud
-    response = client.get("/classify", params={"jobopslag": jobopslag})
+    response = client.post("/classify", params={"jobopslag": jobopslag})
     return response.json()
 
 
