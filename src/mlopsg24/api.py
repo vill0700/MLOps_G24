@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from dataclasses import asdict
 from datetime import datetime
 from http import HTTPStatus
+from pathlib import Path
 from typing import List
 
 import torch
@@ -38,7 +39,12 @@ def add_to_database(dataclass_prediction:DataPrediction, jobopslag:str):
     # contain input or ID to input jobopslag instead of non-unique clean_str
     now = str(datetime.now())
     clean_str = re.sub(r'[^a-zA-Z ]', '', jobopslag)
-    with open("data/drift/prediction_records.csv", "a") as file:
+    path_mock_database = Path("data/drift/prediction_records.csv")
+
+    # Create directory if it doesn't exist. Otherwise github workflow test can fail
+    path_mock_database.parent.mkdir(parents=True, exist_ok=True)
+
+    with path_mock_database.open("a", encoding="utf-8") as file:
         file.write(f"{now}, {clean_str[:100]}, {dataclass_prediction.categori_label}, {dataclass_prediction.categori_idx}\n")
 
 
