@@ -9,12 +9,15 @@ on:
 
 jobs:
   ci-tests:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: ubuntu-latest
-        # os: ["ubuntu-latest", "windows-latest", "macos-latest"] #NOTE:removed due to hf being downloaded each time
+    #NOTE:removed due to hf being downloaded each time
+    # runs-on: ${{ matrix.os }}
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+        # os: ["ubuntu-latest", "windows-latest", "macos-latest"]
 
     steps:
     - name: Checkout
