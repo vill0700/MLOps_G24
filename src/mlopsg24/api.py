@@ -32,9 +32,9 @@ app = FastAPI(lifespan=levetid)
 
 def add_to_database(dataclass_prediction:DataPrediction, jobopslag:str):
     """Add record to databas of predictions"""
-    # Simple example of a database record
+    # NOTE: Simple example of a database record
     # For proper setup it should be record to a DB table and
-    # contain input or id to ID to input jobopslag
+    # contain input or ID to input jobopslag instead of non-unique clean_str
     now = str(datetime.now())
     clean_str = re.sub(r'[^a-zA-Z ]', '', jobopslag)
     with open("data/drift/prediction_records.csv", "a") as file:
