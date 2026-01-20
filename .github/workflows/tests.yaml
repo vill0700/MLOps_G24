@@ -13,42 +13,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        os: "ubuntu-latest"
+        # os: ["ubuntu-latest", "windows-latest", "macos-latest"] #NOTE:removed due to hf being downloaded each time
 
     steps:
-    # - name: Checkout
-    #   uses: actions/checkout@v5
+    - name: Checkout
+      uses: actions/checkout@v5
 
-    # - name: Setup uv
-    #   uses: astral-sh/setup-uv@v7
-    #   with:
-    #     python-version: 3.12
-    #     enable-cache: true
-
-    # - name: Install dependencies
-    #   run: |
-    #     uv sync --dev --locked
-
-    # - name: Test with pytest
-    #   run: |
-    #     uv run pytest -v
-
-#vibecoded chache of hf models
-# 1. Set the HF_HOME env var so the cache location is predictable
-    # 2. Add the cache step
-    - name: Cache Hugging Face models
-      uses: actions/cache@v4
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v7
       with:
-        path: ~/.cache/huggingface
-        key: ${{ runner.os }}-hf-${{ hashFiles('**/requirements.txt', 'pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-hf-
+        python-version: 3.12
+        enable-cache: true
 
     - name: Install dependencies
-      run: uv sync --dev --locked
+      run: |
+        uv sync --dev --locked
 
     - name: Test with pytest
-      env:
-        HF_HOME: ~/.cache/huggingface # Ensure pytest knows where to look
       run: |
         uv run pytest -v
