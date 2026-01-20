@@ -2,6 +2,7 @@
 models/*
 !models/classifier.pt
 data/*
+!data/processed/category_mapping.parquet
 
 #just a personal script
 .debugger_entrypoint.py
