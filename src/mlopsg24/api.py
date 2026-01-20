@@ -1,15 +1,16 @@
 import gc
+import re
 from contextlib import asynccontextmanager
 from dataclasses import asdict
-from http import HTTPStatus
 from datetime import datetime
-import re
+from http import HTTPStatus
+from typing import List
 
 import torch
 from fastapi import BackgroundTasks, FastAPI
 from loguru import logger
 
-from mlopsg24.inference import InferenceClassify, DataPrediction
+from mlopsg24.inference import DataPrediction, InferenceClassify
 
 
 @asynccontextmanager
@@ -52,7 +53,7 @@ def health_check():
 
 
 @app.post("/classify")
-def predict(jobopslag: str, background_task:BackgroundTasks) -> dict:
+async def predict(jobopslag: str, background_task:BackgroundTasks) -> dict:
     """
     Makes a prediction of type DataPrediction.
     Insert a record into a database to enable monitoring of data drift.
@@ -64,3 +65,19 @@ def predict(jobopslag: str, background_task:BackgroundTasks) -> dict:
     background_task.add_task(add_to_database, dataclass_prediction, jobopslag)
 
     return asdict(dataclass_prediction)
+
+
+@app.post("/batch_classify")
+async def predict_batch(list_jobopslag: List[str], background_task:BackgroundTasks) -> dict[int, dict]:
+    """
+    Batch version of predict().
+    Take a list of jobopslag
+    """
+
+    json_results = {}
+    for idx,jobopslag in enumerate(list_jobopslag):
+        dataclass_prediction = app.state.inferencer.classify(jobopslag)
+        background_task.add_task(add_to_database, dataclass_prediction, jobopslag)
+        json_results[idx] = asdict(dataclass_prediction)
+
+    return json_results

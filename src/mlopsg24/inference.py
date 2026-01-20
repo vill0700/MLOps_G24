@@ -115,13 +115,6 @@ class InferenceClassify:
             frontend_error_message=message,
         )
 
-        # df_probability_distribution = pl.DataFrame(
-        #     data={
-        #         "category":self.dict_idx_category.values(),
-        #         "probabilities":probabilities,
-        #         }
-        # ),
-
 
 if __name__ == "__main__":
     jobopslag_example = """
