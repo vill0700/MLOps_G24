@@ -45,11 +45,14 @@ class InferenceClassify:
         self,
         name_model_gliner2: str = "fastino/gliner2-multi-v1",  # NOTE: belongs in config
     ) -> None:
+
         # Use local path if it exists, otherwise use the Hugging Face ID
         self.path_local_gliner2 = Path("models" / Path(name_model_gliner2))
 
         self.path_gliner2: str = (
-            str(self.path_local_gliner2) if self.path_local_gliner2.exists() else name_model_gliner2
+            str(self.path_local_gliner2)
+            if self.path_local_gliner2.exists()
+            else name_model_gliner2
         )
 
         # Load HuggingFace text model

@@ -32,7 +32,8 @@ class PreprocessData:
     """
     def __init__(
         self,
-        path_text_embedder: str | Path = Path("models/intfloat/multilingual-e5-large-instruct"),
+        # path_text_embedder: str | Path = Path("models/intfloat/multilingual-e5-large-instruct"),
+        name_text_embedder: str = "intfloat/multilingual-e5-large-instruct",
         file_data_raw: Path = Path("data/raw/training_jobopslag.parquet"),
         test_size: float = 0.2,
         val_size: float = 0.1,
@@ -47,7 +48,6 @@ class PreprocessData:
             "and tasks from a Danish job vacancy into job category"
         ),
     ) -> None:
-        self.path_text_embedder = path_text_embedder
         self.file_data_raw = file_data_raw
         self.test_size = test_size
         self.val_size = val_size
@@ -57,6 +57,15 @@ class PreprocessData:
         self.column_text = column_text
         self.embedding_prefix = embedding_prefix
         self.batch_size = batch_size
+
+        # Use local model if exists, otherwise try downloading from HuggingFace ID
+        self.path_local_text_embedder =  Path("models" / Path(name_text_embedder))
+
+        self.path_text_embedder: str = (
+            str(self.path_local_text_embedder)
+            if self.path_local_text_embedder.exists()
+            else name_text_embedder
+        )
 
         if not self.path_output.exists():
             logger.info(f"Creating data processed output directory: {self.path_output}")
