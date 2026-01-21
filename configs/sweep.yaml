@@ -2,6 +2,7 @@ program: train.py
 name: sweep
 project: my-awesome-project
 entity: g24
+method: grid
 metric:
     goal: maximize
     name: accuracy
