@@ -72,7 +72,3 @@ The directory structure of the project looks like this:
 ├── requirements_dev.txt      # N/A Development requirements
 └── tasks.py                  # CLI Project tasks using invoke
 ```
-
-
-# My App Preview
-<iframe src="https://maps.google.com" height="300" width="100%"></iframe>
