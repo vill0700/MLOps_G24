@@ -8,8 +8,6 @@ from torch.utils.data import DataLoader, TensorDataset
 import wandb
 from mlopsg24.model import NeuralNetwork
 
-DEFAULT_BATCH_SIZE = 512
-DEFAULT_LR = 1e-3
 DEFAULT_OUTPUT = Path("models/classifier.pt")
 
 def confusion_matrix_counts(model: nn.Module, loader: DataLoader, device: torch.device) -> torch.Tensor:
@@ -163,6 +161,8 @@ def main() -> None:
         help="Folder created by preprocessing (should contain x_train.pt and y_train.pt)",
     )
     parser.add_argument("--epochs", type=int, default=1)
+    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--batch_size", type=int, default=512)
     parser.add_argument(
         "--device",
         type=str,
@@ -208,8 +208,8 @@ def main() -> None:
     # Track hyperparameters and run metadata.
     config={
         "epochs": args.epochs,
-        "batch_size": DEFAULT_BATCH_SIZE,
-        "lr": DEFAULT_LR,
+        "batch_size": args.batch_size,
+        "lr": args.lr,
     }
     )
 
@@ -244,11 +244,11 @@ def main() -> None:
     model = model.to(device)
 
     # Training setup
-    loader = DataLoader(TensorDataset(x_train, y_train), batch_size=DEFAULT_BATCH_SIZE, shuffle=True)
-    val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
-    test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
+    loader = DataLoader(TensorDataset(x_train, y_train), batch_size=args.batch_size, shuffle=True)
+    val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=args.batch_size, shuffle=False)
+    test_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=args.batch_size, shuffle=False)
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=DEFAULT_LR)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     train_loss = [0.0 for _ in range(args.epochs)]
     train_acc = [0.0 for _ in range(args.epochs)]
     val_acc = [0.0 for _ in range(args.epochs)]
@@ -293,13 +293,13 @@ def main() -> None:
     if args.plot_confusion_matrix:
         split = args.cm_split
         if split == "train":
-            cm_loader = DataLoader(TensorDataset(x_train, y_train), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
+            cm_loader = DataLoader(TensorDataset(x_train, y_train), batch_size=args.batch_size, shuffle=False)
         elif split == "val":
             cm_loader = val_loader
         else:
             x_test = torch.load(args.data_dir / "x_test.pt", map_location="cpu")
             y_test = torch.load(args.data_dir / "y_test.pt", map_location="cpu").long()
-            cm_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=DEFAULT_BATCH_SIZE, shuffle=False)
+            cm_loader = DataLoader(TensorDataset(x_test, y_test), batch_size=args.batch_size, shuffle=False)
 
         cm_counts = confusion_matrix_counts(model, cm_loader, device)
         cm_path = args.fig_dir / f"confusion_matrix_{split}.png"
