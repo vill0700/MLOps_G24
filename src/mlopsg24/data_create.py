@@ -16,12 +16,13 @@ from tqdm import tqdm
 # Internal package, not publicly avaiable
 # from bmdb import db_uri
 
-
+#NOTE:DISUSED
 def prepare_text(
     df_jobopslag_raw: pl.DataFrame,
     model_gliner2: GLiNER2,
 ) -> pl.DataFrame:
-    # Non batched version as prototype. Later Vibecode refactored into batched version
+    """Non batched version as prototype. Later Vibecode refactored into batched version"""
+
     def entities_to_natural_language(jobopslag_text: str, model_gliner2: GLiNER2) -> str:
         entities = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
 
@@ -60,14 +61,7 @@ def augment_jobopslag_text(
     model_gliner2: GLiNER2,
 ) -> str:
     """
-    Process a single text through GLiNER2 extraction and formatting.
-
-    Args:
-        text: Input text to process
-        model_gliner2: GLiNER2 model instance
-
-    Returns:
-        Formatted string with extracted entities or empty string on error
+    See prepare_text_batched()
     """
 
     entities_to_extract: list = ["stillingsbetegnelser", "kompetencer", "arbejdsopgaver"]
@@ -77,8 +71,8 @@ def augment_jobopslag_text(
         entities = dict_extracted.get("entities", {})
 
         entities_stil = entities.get("stillingsbetegnelser", None)
-        entities_komp = entities.get("kompetencer")
-        entities_opg = entities.get("arbejdsopgaver")
+        entities_komp = entities.get("kompetencer", None)
+        entities_opg = entities.get("arbejdsopgaver", None)
 
         if not any([entities_stil, entities_komp, entities_opg]):
             logger.error("FAILED to extract neither stillingsbetegnelser, kompetencer nor arbejdsopgaver")
@@ -90,7 +84,7 @@ def augment_jobopslag_text(
         return ""
 
 
-def prepare_text_bactched(df_jobopslag_raw: pl.DataFrame, model_gliner2: GLiNER2, batch_size: int = 32) -> pl.DataFrame:
+def prepare_text_batched(df_jobopslag_raw: pl.DataFrame, model_gliner2: GLiNER2, batch_size: int = 32) -> pl.DataFrame:
     """
     1) GLiNER2 cleans jobopslag text to just the parts of the text expected to be
     good signal for stillingsbetegnelse drop nulls just to make it easier
@@ -193,7 +187,7 @@ def pipeline_data_create(
 
     logger.info("Transforming data")
 
-    df_cleaned = prepare_text_bactched(
+    df_cleaned = prepare_text_batched(
         df_jobopslag_raw=df_jobopslag_raw,
         model_gliner2=model_gliner2,
     )

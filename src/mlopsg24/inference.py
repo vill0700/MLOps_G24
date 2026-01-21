@@ -46,7 +46,7 @@ class InferenceClassify:
         name_model_gliner2: str = "fastino/gliner2-multi-v1",  # NOTE: belongs in config
     ) -> None:
 
-        # Use local path if it exists, otherwise use the Hugging Face ID
+        # Use local saved model if it exists, otherwise download from Huggingface ID
         self.path_local_gliner2 = Path("models" / Path(name_model_gliner2))
 
         self.path_gliner2: str = (
@@ -81,7 +81,7 @@ class InferenceClassify:
 
     def classify(self, jobopslag_text: str) -> DataPrediction:
         """
-        main function
+        Main funciton meant to be called. It return a dataclass containing predictions etc.
         """
         text_augmented = augment_jobopslag_text(text=jobopslag_text, model_gliner2=self.model_extractor)
 
@@ -104,6 +104,7 @@ class InferenceClassify:
             )
             logger.error(message)
 
+        # disable gradient for inference speed - see lecture notes
         with torch.no_grad():
             nn_output = self.model_classifier(embedding)
 

@@ -49,7 +49,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 
-    # load inference map
+    # load inference map from idx to name string
     # NOTE: should be defined central instead in a config
     category_mapping = pl.read_parquet(Path("data/processed/category_mapping.parquet"))
 

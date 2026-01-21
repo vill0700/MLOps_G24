@@ -26,14 +26,15 @@ def lfrontend(ctx:Context) -> None:
 
 @task
 def monitor(ctx:Context) -> None:
-    """create monitoring reports"""
+    """create data drift monitoring reports"""
     ctx.run(f"uv run src/{PROJECT_NAME}/data_drift.py", echo=True, pty=not WINDOWS)
+
+
 
 @task
 def preprocess_data(ctx: Context) -> None:
     """Preprocess data."""
     ctx.run(f"uv run src/{PROJECT_NAME}/data.py data/raw data/processed", echo=True, pty=not WINDOWS)
-
 
 @task
 def train(ctx: Context) -> None:
