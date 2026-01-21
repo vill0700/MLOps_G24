@@ -160,7 +160,7 @@ def main() -> None:
         default=Path("data/processed"),
         help="Folder created by preprocessing (should contain x_train.pt and y_train.pt)",
     )
-    parser.add_argument("--epochs", type=int, default=1)
+    parser.add_argument("--epochs", type=int, default=15)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--batch_size", type=int, default=512)
     parser.add_argument(

@@ -1,0 +1,13 @@
+program: train.py
+name: sweep
+project: my-awesome-project
+entity: g24
+metric:
+    goal: maximize
+    name: accuracy
+parameters:
+    lr:
+        values: [1e-4, 2e-3, 1e-3]
+    batch_size:
+        values: [256, 512]
+run_cap: 10
