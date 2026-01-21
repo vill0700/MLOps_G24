@@ -28,4 +28,4 @@ jobs:
         uv sync --dev --locked
 
     - name: Deploy docs
-      run: mkdocs gh-deploy --force
+      run: cd docs && uv run mkdocs gh-deploy --force
