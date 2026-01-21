@@ -1,11 +1,11 @@
-program: train.py
+program: src/mlopsg24/train.py
 name: sweep
 project: my-awesome-project
 entity: g24
 method: grid
 metric:
     goal: maximize
-    name: accuracy
+    name: val_accuracy
 parameters:
     lr:
         values: [1e-4, 2e-3, 1e-3]
