@@ -36,7 +36,8 @@ class DataPrediction:
 
 class InferenceClassify:
     """
-    This is meant as a inference pipeline, that processes a single datapoint Danish jobopslag.
+    This is meant as a inference pipeline, that processes a single datapoint
+    ie. a Danish job vacancy.
     Sets up a instance to be run using method 'classify()'.
     The imported and used modules are from a batch / DataFrame style pipeline
     """
@@ -46,7 +47,7 @@ class InferenceClassify:
         name_model_gliner2: str = "fastino/gliner2-multi-v1",  # NOTE: belongs in config
     ) -> None:
 
-        # Use local path if it exists, otherwise use the Hugging Face ID
+        # Use local saved model if it exists, otherwise download from Huggingface ID
         self.path_local_gliner2 = Path("models" / Path(name_model_gliner2))
 
         self.path_gliner2: str = (
@@ -81,7 +82,22 @@ class InferenceClassify:
 
     def classify(self, jobopslag_text: str) -> DataPrediction:
         """
-        main function
+        Main function meant to be called.
+
+        Pipeline
+        ---
+        1) augments by extracting stillingsbetegnelse, kompetencer and
+        arbejdsopgaver from a job vacancy text, then rewrites to a single string.
+        2) text embeds the augmented text
+        3) runs trained classifier using the embedding as input features
+
+        Args
+        ---
+        jobopslag text
+
+        Returns
+        ---
+        Dataclass containing predictions etc.
         """
         text_augmented = augment_jobopslag_text(text=jobopslag_text, model_gliner2=self.model_extractor)
 
@@ -104,6 +120,7 @@ class InferenceClassify:
             )
             logger.error(message)
 
+        # disable gradient for inference speed - see lecture notes
         with torch.no_grad():
             nn_output = self.model_classifier(embedding)
 

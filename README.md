@@ -13,6 +13,10 @@ The framework of the project is as follows:
 
 jobannonce classifier
 
+## Architectual overview of inference and retraining pipeline
+<img src="docs/images/architecture.png">
+
+
 ## Project structure
 
 The directory structure of the project looks like this:
@@ -20,49 +24,51 @@ The directory structure of the project looks like this:
 ├── .github/                  # Github actions and dependabot
 │   ├── dependabot.yaml
 │   └── workflows/
-│       └── tests.yaml
-├── configs/                  # Configuration files
+│       ├── codecheck_format  # makes a basic ruff check
+│       └── tests.yaml        # unit and itnegraiton tests
+├── configs/                  # N/A Configuration files N/A
 ├── data/                     # Data directory
-│   ├── processed
-│   ├── interrim
-│   └── raw
+│   ├── processed             # texts processed to tensors and split into train/test/val
+│   ├── drift                 # "database" of for data drift monitoring
+│   └── raw                   # Text data from jobopslag
 ├── dockerfiles/              # Dockerfiles
 │   ├── api.Dockerfile
 │   └── train.Dockerfile
 ├── docs/                     # Documentation
-│   ├── mkdocs.yml
+│   ├── images                # images for markdowns
+│   ├── mkdocs.yml            # N/A
 │   └── source/
 │       └── index.md
-├── models/                   # Trained models
-├── notebooks/                # Jupyter notebooks
+├── models/                   # Trained model weigths, and pretrained Hugginface models
+├── notebooks/                # N/A Jupyter notebooks
 ├── reports/                  # Reports
-│   └── figures/
+│   ├── monitoring/           # data drift monitoring reports in html
+│   ├── figures/
+│   └── data_create_html      # jupyter interactive output of data_create.py
 ├── src/                      # Source code
 │   ├── mlopsg24/
 │   │   ├── __init__.py
-│   │   ├── api.py
+│   │   ├── api.py            # FastAPI endpoint
 │   │   ├── data_create.py    # extracts data from a private db - cannot be run
+│   │   ├── data_drift.py # monitoring data drift reports
 │   │   ├── data_preproces.py # module to embed texts
-│   │   ├── evaluate.py
-│   │   ├── models.py
-│   │   ├── train.py
-│   │   └── visualize.py
-└── tests/                    # Tests
+│   │   ├── frontend.py       # streamlit frontend
+│   │   ├── inference.py      # inference pipeline on a single data point
+│   │   ├── models.py         # the ANN
+│   │   ├── train.py          # training pipeline
+│   │   └── visualize.py      # N/A
+└── tests/
 │   ├── __init__.py
-│   ├── test_api.py
-│   ├── test_data.py
-│   └── test_model.py
+│   ├── unittests.py
+│       └── test_data_preprocess.py   # example of unit test on preprocess pipeline
+│   └── unittests.py
+│       └── test_api.py       # example of integration test on the api
 ├── .gitignore
-├── .pre-commit-config.yaml
+├── .pre-commit-config.yaml   # standard precommits and a local safetymeasure against pushing datafiles
 ├── LICENSE
 ├── pyproject.toml            # Python project file
 ├── README.md                 # Project README
-├── requirements.txt          # Project requirements
-├── requirements_dev.txt      # Development requirements
-└── tasks.py                  # Project tasks
+├── requirements.txt          # N/A Project requirements
+├── requirements_dev.txt      # N/A Development requirements
+└── tasks.py                  # CLI Project tasks using invoke
 ```
-
-
-Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
-a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
-started with Machine Learning Operations (MLOps).

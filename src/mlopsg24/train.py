@@ -2,10 +2,11 @@ import argparse
 from pathlib import Path
 
 import torch
+import wandb
 from loguru import logger
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
-import wandb
+
 from mlopsg24.model import NeuralNetwork
 
 DEFAULT_OUTPUT = Path("models/classifier.pt")

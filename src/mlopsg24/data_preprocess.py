@@ -32,7 +32,6 @@ class PreprocessData:
     """
     def __init__(
         self,
-        # path_text_embedder: str | Path = Path("models/intfloat/multilingual-e5-large-instruct"),
         name_text_embedder: str = "intfloat/multilingual-e5-large-instruct",
         file_data_raw: Path = Path("data/raw/training_jobopslag.parquet"),
         test_size: float = 0.2,
@@ -58,7 +57,7 @@ class PreprocessData:
         self.embedding_prefix = embedding_prefix
         self.batch_size = batch_size
 
-        # Use local model if exists, otherwise try downloading from HuggingFace ID
+        # Use local saved model if exists, otherwise try downloading from HuggingFace ID
         self.path_local_text_embedder =  Path("models" / Path(name_text_embedder))
 
         self.path_text_embedder: str = (
@@ -116,7 +115,7 @@ class PreprocessData:
             batch_embeddings = self.text_embedder.encode(
                 sentences=batch_sentences,
                 convert_to_tensor=True,
-                show_progress_bar=False,  # Disable inner progress bar
+                show_progress_bar=False,
                 prompt=self.embedding_prefix,
                 normalize_embeddings=True,
             )
@@ -162,6 +161,7 @@ class PreprocessData:
         logger.info(f"Targets shape: {self.y_targets.shape}")
         logger.info(f"Number of classes: {len(unique_categories)}")
 
+
     def split_data(self) -> None:
         """
         Split data into train, validation, and test sets.
@@ -173,7 +173,7 @@ class PreprocessData:
             self.y_targets,
             test_size=self.test_size,
             random_state=self.random_state,
-            stratify=self.y_targets,  # Maintain class distribution
+            stratify=self.y_targets,  # Maintains class distribution
         )
 
         # Second split: separate validation from training
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     # Run preprocessing
     PreprocessData(
         batch_size=256,
-        path_text_embedder="intfloat/multilingual-e5-large-instruct",
+        name_text_embedder="intfloat/multilingual-e5-large-instruct",
     ).main()
 
 # %%

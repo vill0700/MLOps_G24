@@ -17,7 +17,7 @@ from mlopsg24.inference import DataPrediction, InferenceClassify
 @asynccontextmanager
 async def levetid(app: FastAPI):
     """
-    - Loads a pretrained hugginfae model into FastAPI once at first call.
+    - Loads a pretrained hugginface model into FastAPI once at first call.
     - At shutdown of API, the hf model is deleted and memory is released.
     """
     app.state.inferencer = InferenceClassify()
@@ -27,8 +27,9 @@ async def levetid(app: FastAPI):
 
     del app.state.inferencer
     gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     logger.info("succesfully closed. Deleted instance of InferenceClassify(). Cleared GPU - just in case")
-
 
 app = FastAPI(lifespan=levetid)
 
@@ -62,7 +63,7 @@ def health_check():
 async def predict(jobopslag: str, background_task:BackgroundTasks) -> dict:
     """
     Makes a prediction of type DataPrediction.
-    Insert a record into a database to enable monitoring of data drift.
+    Inserts a record into a database to enable monitoring of data drift.
     Return a json/dict to the user
     """
 
@@ -79,6 +80,8 @@ async def predict_batch(list_jobopslag: List[str], background_task:BackgroundTas
     Batch version of predict().
     Take a list of jobopslag
     """
+    #NOTE: not truely a batch - for batch to work it must be refactored in
+    # inferencer and add_to_database as a bulk insert (eg PGSQL COPY BINARY)
 
     json_results = {}
     for idx,jobopslag in enumerate(list_jobopslag):
