@@ -1,0 +1,31 @@
+name: Deploy docs website
+
+on:
+  push:
+    branches: [ esben, main ]
+
+permissions:
+    contents: write
+
+jobs:
+  deploy-docs:
+    name: Deploy docs
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        python-version: 3.12
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv sync --dev --locked
+
+    - name: Deploy docs
+      run: mkdocs gh-deploy --force

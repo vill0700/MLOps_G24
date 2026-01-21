@@ -27,6 +27,7 @@ dependencies = [
     "loguru>=0.7.3",
     "markdown>=3.10",
     "matplotlib>=3.10.8",
+    "mkdocs-material>=4.8.0",
     "numpy>=1.26.4,<2.0",
     "pandas>=2.3.3",
     "polars>=1.36.1",

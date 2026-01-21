@@ -16,7 +16,6 @@ jobannonce classifier
 ## Architectual overview of inference and retraining pipeline
 <img src="docs/images/architecture.png">
 
-
 ## Project structure
 
 The directory structure of the project looks like this:

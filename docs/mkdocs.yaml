@@ -20,4 +20,7 @@ plugins:
             show_signature_annotations: true
 
 nav:
-  - Home: index.md
+  - Home: symbolic_link_to_readme.md
+  - App entry point: entry_point.md
+  - Preprocess: preprocess.md
+  - Monitoring: monitoring.md
