@@ -471,7 +471,8 @@
 │   ├── dependabot.yaml
 │   └── workflows/
 │       ├── codecheck_format  # makes a basic ruff check
-│       └── tests.yaml        # unit and itnegraiton tests
+│       ├── deploy_docs       # deploys a mkdocs to github
+│       └── tests.yaml        # unit and integraiton tests
 ├── configs/                  # N/A Configuration files N/A
 ├── data/                     # Data directory
 │   ├── processed             # texts processed to tensors and split into train/test/val
@@ -482,9 +483,8 @@
 │   └── train.Dockerfile
 ├── docs/                     # Documentation
 │   ├── images                # images for markdowns
-│   ├── mkdocs.yml            # N/A
-│   └── source/
-│       └── index.md
+│   ├── mkdocs.yml            # builds a mkdocs
+│   └── source/               # md files for mkdocs
 ├── models/                   # Trained model weigths, and pretrained Hugginface models
 ├── notebooks/                # N/A Jupyter notebooks
 ├── reports/                  # Reports
