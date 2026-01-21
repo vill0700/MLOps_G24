@@ -36,7 +36,8 @@ class DataPrediction:
 
 class InferenceClassify:
     """
-    This is meant as a inference pipeline, that processes a single datapoint Danish jobopslag.
+    This is meant as a inference pipeline, that processes a single datapoint
+    ie. a Danish job vacancy.
     Sets up a instance to be run using method 'classify()'.
     The imported and used modules are from a batch / DataFrame style pipeline
     """
@@ -81,7 +82,22 @@ class InferenceClassify:
 
     def classify(self, jobopslag_text: str) -> DataPrediction:
         """
-        Main funciton meant to be called. It return a dataclass containing predictions etc.
+        Main function meant to be called.
+
+        Pipeline
+        ---
+        1) augments by extracting stillingsbetegnelse, kompetencer and
+        arbejdsopgaver from a job vacancy text, then rewrites to a single string.
+        2) text embeds the augmented text
+        3) runs trained classifier using the embedding as input features
+
+        Args
+        ---
+        jobopslag text
+
+        Returns
+        ---
+        Dataclass containing predictions etc.
         """
         text_augmented = augment_jobopslag_text(text=jobopslag_text, model_gliner2=self.model_extractor)
 
