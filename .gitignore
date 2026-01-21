@@ -1,6 +1,9 @@
 #large files
 models/*
+!models/classifier.pt
 data/*
+!data/processed/category_mapping.parquet
+model.pth
 
 #just a personal script
 .debugger_entrypoint.py
@@ -9,6 +12,10 @@ docs/site/
 
 # test cache
 manual_test/
+
+# training metrics
+reports/metrics.json
+reports/figures
 
 # other local dev info
 .vscode/
@@ -74,6 +81,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+.ruff_cache
 
 # Translations
 *.mo

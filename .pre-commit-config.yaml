@@ -8,3 +8,22 @@ repos:
     -   id: end-of-file-fixer
     -   id: check-yaml
     -   id: check-added-large-files
+    -   id: detect-private-key
+
+# ruff precommit. NOTE: commented out because it always fails - but is kept for reference
+# see https://github.com/astral-sh/ruff-pre-commit
+# - repo: https://github.com/astral-sh/ruff-pre-commit
+#   rev: v0.14.13   # Ruff version.
+#   hooks:
+#     - id: ruff-check
+
+
+# This pre-commit hook is meant as a demonstration for a safety measure for not
+# accidentially sending personal data (GDPR) to an unknown US based data center
+- repo: local
+  hooks:
+    - id: block-csv
+      name: Prevent data files commits
+      entry: 'Stop! Do not commit tabular data, they often might contain personal data'
+      language: fail
+      files: \.(csv|xlsx)$

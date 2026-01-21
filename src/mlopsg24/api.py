@@ -1,27 +1,51 @@
 import gc
+import re
 from contextlib import asynccontextmanager
+from dataclasses import asdict
+from datetime import datetime
 from http import HTTPStatus
+from pathlib import Path
+from typing import List
 
-from fastapi import FastAPI
+import torch
+from fastapi import BackgroundTasks, FastAPI
 from loguru import logger
 
-from mlopsg24.inference import InferenceClassify
+from mlopsg24.inference import DataPrediction, InferenceClassify
 
 
 @asynccontextmanager
 async def levetid(app: FastAPI):
-    global inferencer  # feels unpythonic to do global variables
-    inferencer = InferenceClassify()
-    logger.info("instance of InferenceClassify() loaded")
+    """
+    - Loads a pretrained hugginfae model into FastAPI once at first call.
+    - At shutdown of API, the hf model is deleted and memory is released.
+    """
+    app.state.inferencer = InferenceClassify()
+    logger.info("instance of InferenceClassify() loaded into FastAPI app.state")
 
     yield
 
-    del inferencer
+    del app.state.inferencer
     gc.collect()
     logger.info("succesfully closed. Deleted instance of InferenceClassify(). Cleared GPU - just in case")
 
 
 app = FastAPI(lifespan=levetid)
+
+def add_to_database(dataclass_prediction:DataPrediction, jobopslag:str):
+    """Add record to databas of predictions"""
+    # NOTE: Simple example of a database record
+    # For proper setup it should be record to a DB table and
+    # contain input or ID to input jobopslag instead of non-unique clean_str
+    now = str(datetime.now())
+    clean_str = re.sub(r'[^a-zA-Z ]', '', jobopslag)
+    path_mock_database = Path("data/drift/prediction_records.csv")
+
+    # Create directory if it doesn't exist. Otherwise github workflow test can fail
+    path_mock_database.parent.mkdir(parents=True, exist_ok=True)
+
+    with path_mock_database.open("a", encoding="utf-8") as file:
+        file.write(f"{now}, {clean_str[:100]}, {dataclass_prediction.categori_label}, {dataclass_prediction.categori_idx}\n")
 
 
 @app.get("/")
@@ -34,20 +58,32 @@ def health_check():
     return response
 
 
-@app.get("/classify")
-def predict(jobopslag: str):
-    mock_distribution, translate, message = inferencer.classify(jobopslag)
-    mock_prediction = translate.get(0, "fail")
+@app.post("/classify")
+async def predict(jobopslag: str, background_task:BackgroundTasks) -> dict:
+    """
+    Makes a prediction of type DataPrediction.
+    Insert a record into a database to enable monitoring of data drift.
+    Return a json/dict to the user
+    """
 
-    prediction = mock_prediction
+    dataclass_prediction = app.state.inferencer.classify(jobopslag)
 
-    distribution = {translate.get(idx, "mapfail"): float(prop) for idx, prop in enumerate(mock_distribution[:22])}
+    background_task.add_task(add_to_database, dataclass_prediction, jobopslag)
 
-    response = {
-        "prediction": prediction,
-        "probability distribution": distribution,  # "TODO", #Maybe a new dict of key:values?
-        "received text formatted": jobopslag,
-        "frontend_error_message": message,
-    }
+    return asdict(dataclass_prediction)
 
-    return response
+
+@app.post("/batch_classify")
+async def predict_batch(list_jobopslag: List[str], background_task:BackgroundTasks) -> dict[int, dict]:
+    """
+    Batch version of predict().
+    Take a list of jobopslag
+    """
+
+    json_results = {}
+    for idx,jobopslag in enumerate(list_jobopslag):
+        dataclass_prediction = app.state.inferencer.classify(jobopslag)
+        background_task.add_task(add_to_database, dataclass_prediction, jobopslag)
+        json_results[idx] = asdict(dataclass_prediction)
+
+    return json_results

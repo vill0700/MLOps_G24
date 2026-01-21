@@ -11,9 +11,29 @@ from tqdm import tqdm
 
 
 class PreprocessData:
+    """
+    Preprocessing pipeline for job vacancy text classification.
+
+    Handles loading raw job posting data, creating text embeddings using
+    SentenceTransformer, preparing categorical targets, and splitting data
+    into train/validation/test sets for model training.
+
+    Attributes:
+        path_text_embedder: Path to the SentenceTransformer model
+        file_data_raw: Path to raw parquet data file
+        test_size: Proportion of data for test set (default 0.2)
+        val_size: Proportion of data for validation set (default 0.1)
+        random_state: Random seed for reproducibility (default 42)
+        batch_size: Batch size for embedding generation (default 32)
+        path_output: Output directory for processed data (default "data/processed")
+        column_target_class: Target column name (default "erhvervsomraade_txt")
+        column_text: Text column name for embeddings (default "annonce_tekst")
+        embedding_prefix: Instruction prefix for text embedding model
+    """
     def __init__(
         self,
-        path_text_embedder: str | Path = Path("models/intfloat/multilingual-e5-large-instruct"),
+        # path_text_embedder: str | Path = Path("models/intfloat/multilingual-e5-large-instruct"),
+        name_text_embedder: str = "intfloat/multilingual-e5-large-instruct",
         file_data_raw: Path = Path("data/raw/training_jobopslag.parquet"),
         test_size: float = 0.2,
         val_size: float = 0.1,
@@ -28,7 +48,6 @@ class PreprocessData:
             "and tasks from a Danish job vacancy into job category"
         ),
     ) -> None:
-        self.path_text_embedder = path_text_embedder
         self.file_data_raw = file_data_raw
         self.test_size = test_size
         self.val_size = val_size
@@ -38,6 +57,15 @@ class PreprocessData:
         self.column_text = column_text
         self.embedding_prefix = embedding_prefix
         self.batch_size = batch_size
+
+        # Use local model if exists, otherwise try downloading from HuggingFace ID
+        self.path_local_text_embedder =  Path("models" / Path(name_text_embedder))
+
+        self.path_text_embedder: str = (
+            str(self.path_local_text_embedder)
+            if self.path_local_text_embedder.exists()
+            else name_text_embedder
+        )
 
         if not self.path_output.exists():
             logger.info(f"Creating data processed output directory: {self.path_output}")

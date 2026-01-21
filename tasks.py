@@ -5,14 +5,29 @@ from invoke import Context, task
 WINDOWS = os.name == "nt"
 PROJECT_NAME = "mlopsg24"
 PYTHON_VERSION = "3.12"
-
+#NOTE: belongs in config
 
 # Project commands
+@task
+def api(ctx:Context) -> None:
+    """open a FastAPI"""
+    ctx.run(f"uv run uvicorn --reload --port 8000 src.{PROJECT_NAME}.api:app", echo=True, pty=not WINDOWS)
+
 @task
 def frontend(ctx: Context) -> None:
     """open a streamlit frontend"""
     ctx.run(f"uv run streamlit run src/{PROJECT_NAME}/frontend.py", echo=True, pty=not WINDOWS)
 
+
+@task
+def lfrontend(ctx:Context) -> None:
+    """open a localhosted streamlit frontend"""
+    ctx.run(f"uv run streamlit run src/{PROJECT_NAME}/frontend.py -- --localhost", echo=True, pty=not WINDOWS)
+
+@task
+def monitor(ctx:Context) -> None:
+    """create monitoring reports"""
+    ctx.run(f"uv run src/{PROJECT_NAME}/data_drift.py", echo=True, pty=not WINDOWS)
 
 @task
 def preprocess_data(ctx: Context) -> None:

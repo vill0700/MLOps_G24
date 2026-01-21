@@ -76,10 +76,6 @@ def augment_jobopslag_text(
         dict_extracted = model_gliner2.extract_entities(text, entities_to_extract)
         entities = dict_extracted.get("entities", {})
 
-        str_stil = f"{', '.join(entities.get('stillingsbetegnelser', []))}. "
-        # str_komp = f"{', '.join(entities.get('kompetencer', []))}. "
-        # str_opg = f"{', '.join(entities.get('arbejdsopgaver', []))}. "
-
         entities_stil = entities.get("stillingsbetegnelser", None)
         entities_komp = entities.get("kompetencer")
         entities_opg = entities.get("arbejdsopgaver")

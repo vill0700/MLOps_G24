@@ -1,31 +1,38 @@
-name: Unit and integration test
+name: "Unit and integration tests"
 
 on:
   push:
-    branches: [main, esben]
+    branches: [ esben, main ]
   pull_request:
-    branches: [main, esben]
+    branches: [ esben, main ]
+
 
 jobs:
-  esben_test:
-    runs-on: ${{ matrix.operating-system }}
+  ci-tests:
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        operating-system: ["ubuntu-latest", "windows-latest", "macos-latest"]
+    #NOTE:removed due to hf being downloaded each time
+    # runs-on: ${{ matrix.os }}
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+        # os: ["ubuntu-latest", "windows-latest", "macos-latest"]
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+    - name: Checkout
+      uses: actions/checkout@v5
 
-      - name: Setup uv with cache
-        uses: astral-sh/setup-uv@v7
-        with:
-          python-version: 3.12
-          enable-cache: true
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        python-version: 3.12
+        enable-cache: true
 
-      - name: Install dependencies
-        run: uv sync --dev --locked
+    - name: Install dependencies
+      run: |
+        uv sync --dev --locked
 
-      - name: Test with pytest
-        run: uv run pytest -v
+    - name: Test with pytest
+      run: |
+        uv run pytest -v
