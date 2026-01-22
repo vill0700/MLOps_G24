@@ -201,6 +201,12 @@ def main() -> None:
         help="If set, quantizes weights to int8",
     )
     parser.add_argument(
+        "--prune",
+        action="store_true",
+        default=False,
+        help="If set, prunes the 1/5 smallest weights",
+    )
+    parser.add_argument(
         "--cm-split",
         type=str,
         default="test",
@@ -354,19 +360,29 @@ def main() -> None:
     final_accuracy = test_metric["accuracy"]
 
     wandb.log({"final_image": wandb.Image(str(cm_path))})
+    save_name = "models/model"
+    if args.prune:
+        save_name += "_pruned"
+        prune.global_unstructured(
+            [(model.model[0], 'weight')],
+            pruning_method=prune.L1Unstructured,
+            amount=0.2
+        )
+        logger.debug(f"Model weights: {model.model[0].weight}")
+        logger.debug(f"Model weight mask: {model.model[0].weight_mask}")
+        prune.remove(model.model[0], 'weight')
+        logger.info("Pruned 20% of model weights")
     if args.quantize:
         quantize_(model, int8_weight_only())
-        save_name = "model_quantized.pth"
-    else:
-        save_name = "model.pth"
-    torch.save(model.state_dict(), save_name)
+        save_name += "_quantized"
+    torch.save(model.state_dict(), save_name + ".pth")
     artifact = wandb.Artifact(
         name="job_classifier",
         type="model",
         description="Job classification model on job texts",
         metadata={"test accuracy": final_accuracy},
     )
-    artifact.add_file(save_name)
+    artifact.add_file(save_name + ".pth")
     run.log_artifact(artifact)
 
 if __name__ == "__main__":
