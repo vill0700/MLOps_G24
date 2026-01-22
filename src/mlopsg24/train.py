@@ -6,6 +6,7 @@ import wandb
 from loguru import logger
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
+from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 
 from mlopsg24.model import NeuralNetwork
 
@@ -188,6 +189,12 @@ def main() -> None:
         help="If set, writes confusion matrix figure to --fig-dir"
     )
     parser.add_argument(
+        "--profile",
+        action="store_true",
+        default=False,
+        help="If set, profiles the training loop on cpu (and gpu if available)"
+    )
+    parser.add_argument(
         "--cm-split",
         type=str,
         default="test",
@@ -220,6 +227,7 @@ def main() -> None:
     else:
         device_str = args.device
     device = torch.device(device_str)
+    logger.info(device)
 
     # Load preprocessed tensors
     x_train_path = args.data_dir / "x_train.pt"
@@ -254,8 +262,19 @@ def main() -> None:
     train_acc = [0.0 for _ in range(args.epochs)]
     val_acc = [0.0 for _ in range(args.epochs)]
 
-    logger.info("Started training")
+    if args.profile:
+        logger.info("Started profiling")
+        activities = [ProfilerActivity.CPU]
+        if device.type == "cuda":
+            logger.info("Profiling both cpu and cuda")
+            activities.append(ProfilerActivity.CUDA)
+        prof = profile(activities=activities, record_shapes=True, profile_memory=True, 
+                       on_trace_ready=tensorboard_trace_handler("./log/model_profile"))
+        prof.start()
+        is_profiling = True
+
     # Training loop
+    logger.info("Started training")
     for epoch in range(args.epochs):
         model.train()
         total = 0.0
@@ -271,7 +290,11 @@ def main() -> None:
             total += float(loss.item())
             counter += x.shape[0]
             wandb.log({"train_loss": loss.item()})
-
+            if args.profile:
+                prof.step()
+                if i == 10 and is_profiling:
+                    prof.stop()
+                    is_profiling = False
             if i % 100 == 0:
                 grads = torch.cat([p.grad.flatten() for p in model.parameters() if p.grad is not None], 0)
                 wandb.log({"gradients": wandb.Histogram(grads.cpu())})
