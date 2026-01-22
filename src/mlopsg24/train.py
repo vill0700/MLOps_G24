@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-
+from torch.nn.utils import prune
 import torch
 import wandb
 from loguru import logger
@@ -195,6 +195,12 @@ def main() -> None:
         help="If set, profiles the training loop on cpu (and gpu if available)"
     )
     parser.add_argument(
+        "--quantize",
+        action="store_true",
+        default=False,
+        help="If set, quantizes weights to int8",
+    )
+    parser.add_argument(
         "--cm-split",
         type=str,
         default="test",
@@ -207,6 +213,10 @@ def main() -> None:
         help="If set, confusion matrix shows raw counts (default: row-normalized)",
     )
     args = parser.parse_args()
+
+    if args.quantize:
+        from torchao.quantization import quantize_
+        from torchao.quantization.quant_api import int8_weight_only
 
     run = wandb.init(
     # Set the wandb entity where your project will be logged (generally your team name).
@@ -344,14 +354,19 @@ def main() -> None:
     final_accuracy = test_metric["accuracy"]
 
     wandb.log({"final_image": wandb.Image(str(cm_path))})
-    torch.save(model.state_dict(), "model.pth")
+    if args.quantize:
+        quantize_(model, int8_weight_only())
+        save_name = "model_quantized.pth"
+    else:
+        save_name = "model.pth"
+    torch.save(model.state_dict(), save_name)
     artifact = wandb.Artifact(
         name="job_classifier",
         type="model",
         description="Job classification model on job texts",
         metadata={"test accuracy": final_accuracy},
     )
-    artifact.add_file("model.pth")
+    artifact.add_file(save_name)
     run.log_artifact(artifact)
 
 if __name__ == "__main__":

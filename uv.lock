@@ -1585,6 +1585,7 @@ dependencies = [
     { name = "streamlit" },
     { name = "torch" },
     { name = "torch-tb-profiler" },
+    { name = "torchao" },
     { name = "typer" },
     { name = "uvicorn" },
     { name = "wandb" },
@@ -1625,6 +1626,7 @@ requires-dist = [
     { name = "streamlit", specifier = ">=1.52.2" },
     { name = "torch", specifier = "==2.2.2" },
     { name = "torch-tb-profiler", specifier = ">=0.4.3" },
+    { name = "torchao", specifier = ">=0.15.0" },
     { name = "typer", specifier = "==0.21.1" },
     { name = "uvicorn", specifier = "==0.40.0" },
     { name = "wandb", specifier = ">=0.24.0" },
@@ -3431,6 +3433,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/96/3f/1bdbeae21db91179c295bcecb7194d57cd0e184125c69e5a6e315ea4770f/torch_tb_profiler-0.4.3.tar.gz", hash = "sha256:8b8d29b2de960b3c4423087b23cec29beaf9ac3a8c7b046c18fd25b218f726b1", size = 1057029, upload-time = "2023-10-06T15:28:57.961Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/46/d0/891ec43349f287ea5c313ebc1320e4eda38ccd4c7a0951657213467eaab5/torch_tb_profiler-0.4.3-py3-none-any.whl", hash = "sha256:207a49b05572dd983e4ab29eb5e0fcadd60374a8f93c78ec638217e8d18788dc", size = 1053410, upload-time = "2023-10-06T15:28:56.53Z" },
+]
+
+[[package]]
+name = "torchao"
+version = "0.15.0"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/57/2d/472b9362dceae05a4599e2b94f86e69a29c0e20964a6af84f34f6ead5938/torchao-0.15.0-cp310-abi3-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1cbe813201314ba6329a650a76944502f3e8ec4b1b44523f3f48676810d8d1f6", size = 7163930, upload-time = "2025-12-18T23:14:41.876Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/3b/6b9d5618720f63dbc2e2509cd6b57aae9c0d61b738d1d2172f4d5d9efaab/torchao-0.15.0-py3-none-any.whl", hash = "sha256:3f3812676048ef8a2a0e9d492d12d8971ba7a7ebb16f54aa56f690414e130d2c", size = 1080679, upload-time = "2025-12-18T23:14:43.807Z" },
 ]
 
 [[package]]
