@@ -434,7 +434,10 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 22 fill here ---
+
+We trained our model in the cloud using Google Compute Engine (Engine). We created and used a VM in our GCP project (`mlopsg24`) and connected to it using `gcloud compute ssh`. Our processed dataset (PyTorch tensors for train/val/test) was stored in Google Cloud Storage at `gs://mlops_g24_data/data/processed/`, and we downloaded it onto the VM using `gsutil`.
+
+Training was started on the VM by running our training script with `uv`, e.g. `WANDB_MODE=disabled uv run src/mlopsg24/train.py --data-dir data/processed --epochs 20`. The run completed in the cloud and produced artifacts on the VM (a saved model checkpoint under `models/` and evaluation figures under `reports/figures/`). We used Compute Engine because it gave us a straightforward way to run longer experiments on remote hardware without changing our code to fit a managed training service.
 
 ## Deployment
 
