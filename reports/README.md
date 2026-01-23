@@ -608,3 +608,5 @@ We made [this figure](../docs/images/architecture.png), which is also the root R
 
 - s251297: made data_create data_preprocess, inference, api, frontend, data_drift, unittest of preprocess, integration test of api, pre-commit-config, several CLI invoke tasks, github workflows, mkdocs.
 - s251297 used GenAI to write prototypes of programs, write code snippets, to help understand bugs and as a Teaching Assistent.
+- s224217: Validation/test sets in training, logger in training and wandb + hyperparameter sweeps, profiling, coverage, quantization and pruning.
+- s224217 used GenAI for questions about the course material and package documentation.
