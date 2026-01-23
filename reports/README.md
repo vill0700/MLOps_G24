@@ -361,8 +361,9 @@ And result from the hyperparameter sweep run of how the batch size and learning 
 >
 > Answer:
 
---- question 15 fill here ---
-
+We made one dockerfile, which is in `dockerfiles/train.dockerfile`. The resulting image is quite large (about 20 gb). It trains the logistic model, saves it and logs to WANDB. We did not put a flag to turn off WANDB logging, so right now it is necessary to have a key. 
+After creating an image from the dockerfile, a container that runs the training file can be run with for example `docker run -e WANDB_API_KEY=<your_key> train:latest --epochs 15 --quantize --prune` .
+We did not use it for anything, but it allows for better reproducability when training on different OS. 
 ### Question 16
 
 > **When running into bugs while trying to run your experiments, how did you perform debugging? Additionally, did you**
@@ -600,7 +601,9 @@ We made the following figure ![this figure](../docs/images/architecture.png), wh
 >
 > Answer:
 
---- question 30 fill here ---
+Package management was one of the biggest challenges, as the group members with macbooks had problems with newer versions of PyTorch, but some packages like TorchAO required those versions. If we had found out about this earlier, we would have used Docker more. Torch.compile() also does not work in the newest torch versions, and we found out about these dependency issues late in the project.
+
+The dockerfile was a bit of a hassle to make, as it takes a long time to create the image and it is very large, making debugging difficult. 
 
 ### Question 31
 
@@ -620,5 +623,5 @@ We made the following figure ![this figure](../docs/images/architecture.png), wh
 
 - s251297: made data_create data_preprocess, inference, api, frontend, data_drift, unittest of preprocess, integration test of api, pre-commit-config, several CLI invoke tasks, github workflows, mkdocs.
 - s251297 used GenAI to write prototypes of programs, write code snippets, to help understand bugs and as a Teaching Assistent.
-- s224217: Validation/test sets in training, logger in training and wandb + hyperparameter sweeps, profiling, coverage, quantization and pruning.
+- s224217: Validation/test sets in training, logger in training and wandb + hyperparameter sweeps, profiling, coverage, quantization and pruning, docker training file.
 - s224217 used GenAI for questions about the course material and package documentation.
