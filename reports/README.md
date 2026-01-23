@@ -303,7 +303,8 @@ We did not use DVC for our project. It would be relevant for our project if the 
 >
 > Answer:
 
---- question 12 fill here ---
+We used the argparse python package for handling arguments. The training file can be called with uv run or python3, for example from the root:
+uv run src/mlopsg24/train.py --epochs 15 --lr 1e-3 --quantize --prune
 
 ### Question 13
 
@@ -318,7 +319,7 @@ We did not use DVC for our project. It would be relevant for our project if the 
 >
 > Answer:
 
---- question 13 fill here ---
+The experiments were logged in Weights and Biases. For every run, the training loss, validation set accuracies for every epoch, a confusion matrix, and a histogram of the gradients are saved. Moreover, an artifact is also saved that contains the final test set accuracy, the model itself, information about the computer that ran it, batch size, epochs and learning-rate. The experiments were not seeded, but are reproducible in the sense that that the project code works in our docker training file and converge to the approximately the same result in many repeated experiments.
 
 ### Question 14
 
@@ -335,7 +336,15 @@ We did not use DVC for our project. It would be relevant for our project if the 
 >
 > Answer:
 
---- question 14 fill here ---
+Result from the hyperparameter sweep run of the validation set prediction accuracies, where it looks like experiments with lower learning rate had too few epochs to converge:
+[Sweep: Validation accuracy](figures/valacc.png)
+
+Result from the hyperparameter sweep run of the resulting confusion matrices, where the models that did not converge had worse performance:
+[Sweep: Confusion matrix](figures/confus.png)
+
+And result from the hyperparameter sweep run of how the batch size and learning rate impacted the final validation accuracy, where it can be seen that the learning rate was very important and the batch size was not. 
+[Sweep: Parameters](figures/sweepimg.png)
+
 
 ### Question 15
 
@@ -365,9 +374,7 @@ We did not use DVC for our project. It would be relevant for our project if the 
 >
 > Answer:
 
-We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug: Evaluate in Debug Console.` to run selected line in python file in the debug terminal console. We also used VScode's debugger to develop new smaller features or feature changes.
-
---- question 16 fill here ---
+We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug: Evaluate in Debug Console.` to run selected line in python file in the debug terminal console. We also used VScode's debugger to develop new smaller features or feature changes. We used profiling to look for bottlenecks in the training loop, but the model trains very fast, and there were no obvious bottlenecks. If the model was to be deployed for a company, we would look into how to make the embedder more efficient instead.
 
 ## Working in the cloud
 
