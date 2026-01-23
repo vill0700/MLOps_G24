@@ -16,7 +16,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = "==3.11.14"
 dependencies = [
     "dataframely>=2.4.0",
     "evidently>=0.7.20",
@@ -35,7 +35,7 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "sentence-transformers>=5.2.0",
     "streamlit>=1.52.2",
-    "torch==2.2.2",
+    "torch==2.9.1",
     "torch-tb-profiler>=0.4.3",
     "torchao>=0.15.0",
     "typer==0.21.1",
