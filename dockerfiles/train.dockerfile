@@ -15,8 +15,6 @@ COPY src/mlopsg24/model.py src/mlopsg24/model.py
 COPY src/mlopsg24/train.py src/mlopsg24/train.py
 COPY src/mlopsg24/__init__.py src/mlopsg24/__init__.py
 COPY data/processed data/processed/
-COPY models/models--fastino--gliner2-multi-v1 models/models--fastino--gliner2-multi-v1
-COPY models/models--intfloat--multilingual-e5-large-instruct models/models--intfloat--multilingual-e5-large-instruct
 COPY README.md README.md
 
 ENTRYPOINT ["uv", "run", "src/mlopsg24/train.py", "--epochs", "15"]
