@@ -68,17 +68,17 @@ will check the repositories and the code to verify your answers.
 * [ ] Build the docker files locally and make sure they work as intended (M10)
 * [ ] Write one or multiple configurations files for your experiments (M11)
 * [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
-* [ ] Use profiling to optimize your code (M12)
-* [ ] Use logging to log important events in your code (M14)
-* [ ] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
-* [ ] Consider running a hyperparameter optimization sweep (M14)
+* [x] Use profiling to optimize your code (M12)
+* [x] Use logging to log important events in your code (M14)
+* [x] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
+* [x] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
 ### Week 2
 
 * [x] Write unit tests related to the data part of your code (M16)
 * [x] Write unit tests related to model construction and or model training (M16)
-* [ ] Calculate the code coverage (M16)
+* [x] Calculate the code coverage (M16)
 * [x] Get some continuous integration running on the GitHub repository (M17)
 * [x] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
 * [x] Add a linting step to your continuous integration (M17)
@@ -104,7 +104,7 @@ will check the repositories and the code to verify your answers.
 * [ ] Create one or more alert systems in GCP to alert you if your app is not behaving correctly (M28)
 * [ ] If applicable, optimize the performance of your data loading using distributed data loading (M29)
 * [ ] If applicable, optimize the performance of your training pipeline by using distributed training (M30)
-* [ ] Play around with quantization, compilation and pruning for you trained models to increase inference speed (M31)
+* [x] Play around with quantization, compilation and pruning for you trained models to increase inference speed (M31)
 
 ### Extra
 
@@ -122,7 +122,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 1 fill here ---
+> 24
 
 ### Question 2
 > **Enter the study number for each member in the group**
@@ -133,7 +133,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 2 fill here ---
+> s251297, s224217, 224181, 246035
 
 ### Question 3
 > **A requirement to the project is that you include a third-party package not covered in the course. What framework**
@@ -151,8 +151,6 @@ will check the repositories and the code to verify your answers.
 > - Dataframely to do data validation of Polars DataFramses. Data validation is not to be confused with unit testing of data, where the former is a executed when loading data in batches or tables, which is used in the training of a ML model ie. data enginering. Data testing latter is a logical test of the properties of a single data point often user inputtet, which test the boundries of a the inference functionality, ie. software engineering.
 > - Dataclasses to structure data sent between modules.
 > - We considered using Pydantic BaseSettings along with .env file to centralise the repos shared settings and variables, but just made a dotenv() example.
-
---- question 3 fill here ---
 
 ## Coding environment
 
@@ -172,7 +170,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 4 fill here ---
+> We used UV for managing dependencies. We used uv add when adding new packages to automatically add the packages to pyproject.toml and the exact method of installation to uv.lock. uv sync --dev --locked would sync to the virtual environment we used. We also used Dependabot to automatically find upgrades with GitHub Actions.
 
 ### Question 5
 
