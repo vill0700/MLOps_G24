@@ -959,7 +959,7 @@ The imported and used modules are from a batch / DataFrame style pipeline</p>
 
         <span class="c1"># load trained classifier to eval mode and cpu</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_classifier</span> <span class="o">=</span> <span class="n">NeuralNetwork</span><span class="p">()</span>
-        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DEFAULT_OUTPUT</span><span class="p">)[</span><span class="s2">&quot;state_dict&quot;</span><span class="p">]</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DEFAULT_OUTPUT</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">)[</span><span class="s2">&quot;state_dict&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_classifier</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_classifier</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
