@@ -57,20 +57,6 @@ dev = [
     "ty>=0.0.12",
 ]
 
-
-[tool.uv.sources]
-# torch = [
-#     { index = "pytorch-cpu" },
-# ]
-# torchvision = [
-#     { index = "pytorch-cpu" },
-# ]
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
-
 [tool.ruff]
 lint.select = ["I"]
 line-length = 80
