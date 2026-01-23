@@ -219,8 +219,7 @@ will check the repositories and the code to verify your answers.
 > *application but also ... .*
 >
 > Answer:
-> *We implemented 3 unit test testing the data preprocessing module. We implemented two integration tests of FastAPI. The integration test used a contex manager to ensure that the app runs it lifetime section.*
---- question 7 fill here ---
+> We implemented 3 unit test testing the data preprocessing module. We implemented two integration tests of FastAPI. The integration test used a contex manager to ensure that the app runs it lifetime section.
 
 ### Question 8
 
@@ -233,9 +232,9 @@ will check the repositories and the code to verify your answers.
 > *The total code coverage of code is X%, which includes all our source code. We are far from 100% coverage of our **
 > *code and even if we were then...*
 >
-> Answer:
+> Answer: 
 
---- question 8 fill here ---
+using the following command: uv run coverage run --source=src/mlopsg24 -m pytest tests/ , we got a coverage of 30%. This is not a lot, and we could write much more if it was for a "real" project, but coverage does not tell the full story. The few tests we run are of high quality, testing a lot of things about the API and data.
 
 ### Question 9
 
@@ -265,7 +264,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 10 fill here ---
+We did not use DVC for our project. It would be relevant for our project if the data was to change, since it is a large dataset and DVC makes it easy to work with version control without copying the entire dataset into github every time. It would also work well with WANDB and for working with data drifting.
 
 ### Question 11
 
