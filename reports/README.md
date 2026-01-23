@@ -139,18 +139,19 @@ will check the repositories and the code to verify your answers.
 > **A requirement to the project is that you include a third-party package not covered in the course. What framework**
 > **did you choose to work with and did it help you complete the project?**
 >
-> Recommended answer length: 100-200 words.
+> Recommended answer length: 100-200 words.****
 >
 > Example:
 > *We used the third-party framework ... in our project. We used functionality ... and functionality ... from the*
 >
 > Answer:
-> We used:
-> - GLiNER2 and SentenceTransformer, both libraries for NLP to clean and transform text into tensors easily used as inputtet for an ANN.
-> - Polars for more stringent datatypes and readable data transformations.
-> - Dataframely to do data validation of Polars DataFramses. Data validation is not to be confused with unit testing of data, where the former is a executed when loading data in batches or tables, which is used in the training of a ML model ie. data enginering. Data testing latter is a logical test of the properties of a single data point often user inputtet, which test the boundries of a the inference functionality, ie. software engineering.
-> - Dataclasses to structure data sent between modules.
-> - We considered using Pydantic BaseSettings along with .env file to centralise the repos shared settings and variables, but just made a dotenv() example.
+
+We used:
+- GLiNER2 and SentenceTransformer, both libraries for NLP to clean and transform text into tensors easily used as inputtet for an ANN.
+- Polars for more stringent datatypes and readable data transformations.
+- Dataframely to do data validation of Polars DataFramses. Data validation is not to be confused with unit testing of data, where the former is a executed when loading data in batches or tables, which is used in the training of a ML model ie. data enginering. Data testing latter is a logical test of the properties of a single data point often user inputtet, which test the boundries of a the inference functionality, ie. software engineering.
+- Dataclasses to structure data sent between modules.
+- We considered using Pydantic BaseSettings along with .env file to centralise the repos shared settings and variables, but just made a dotenv() example.
 
 ## Coding environment
 
@@ -221,7 +222,8 @@ We implemented a ruff github workflow check, but removed it again because it kep
 > *application but also ... .*
 >
 > Answer:
-> We implemented 3 unit test testing the data preprocessing module. We implemented two integration tests of FastAPI. The integration test used a contex manager to ensure that the app runs it lifetime section.
+
+We implemented 3 unit test testing the data preprocessing module. We implemented two integration tests of FastAPI. The integration test used a contex manager to ensure that the app runs it lifetime section.
 
 ### Question 8
 
@@ -234,7 +236,7 @@ We implemented a ruff github workflow check, but removed it again because it kep
 > *The total code coverage of code is X%, which includes all our source code. We are far from 100% coverage of our **
 > *code and even if we were then...*
 >
-> Answer: 
+> Answer:
 
 using the following command: uv run coverage run --source=src/mlopsg24 -m pytest tests/ , we got a coverage of 30%. This is not a lot, and we could write much more if it was for a "real" project, but coverage does not tell the full story. The few tests we run are of high quality, testing a lot of things about the API and data.
 
@@ -282,9 +284,9 @@ We did not use DVC for our project. It would be relevant for our project if the 
 > *here: <weblink>*
 >
 > Answer:
-> *We made a simple ruff test for linting into a GitHub Workflow. The workflow running the integration test is set to only run on linux, as the test downloads a huggingface model each time. we implemented caching of python, but skipped trying to cache the HF model. It would require that the workflow sets up defined cache for the HF model, or that the integrationtest is not made at the API endpoint but at code sections constitutiong the API*
 
---- question 11 fill here ---
+We made a simple ruff test for linting into a GitHub Workflow. The workflow running the integration test is set to only run on linux, as the test downloads a huggingface model each time. we implemented caching of python, but skipped trying to cache the HF model. It would require that the workflow sets up defined cache for the HF model, or that the integrationtest is not made at the API endpoint but at code sections constitutiong the API*
+
 
 ## Running code and tracking experiments
 
@@ -342,7 +344,7 @@ Result from the hyperparameter sweep run of the validation set prediction accura
 Result from the hyperparameter sweep run of the resulting confusion matrices, where the models that did not converge had worse performance:
 [Sweep: Confusion matrix](figures/confus.png)
 
-And result from the hyperparameter sweep run of how the batch size and learning rate impacted the final validation accuracy, where it can be seen that the learning rate was very important and the batch size was not. 
+And result from the hyperparameter sweep run of how the batch size and learning rate impacted the final validation accuracy, where it can be seen that the learning rate was very important and the batch size was not.
 [Sweep: Parameters](figures/sweepimg.png)
 
 
@@ -467,9 +469,9 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *to the API to make it more ...*
 >
 > Answer:
-> *We wrote an API in FastAPI. This provided an endpoint for the classificaiton, and also returns usefull data of the predictions, susch as the probability distribution of the predciton the the classes. We also tryed to add a batch api process, but it would require refactioring the function that the API calls to expose the parts that can be batched*
 
---- question 23 fill here ---
+We wrote an API in FastAPI. This provided an endpoint for the classificaiton, and also returns usefull data of the predictions, susch as the probability distribution of the predciton the the classes. We also tryed to add a batch api process, but it would require refactioring the function that the API calls to expose the parts that can be batched
+
 
 ### Question 24
 
@@ -484,9 +486,9 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
 > Answer:
-> *Yes. We deployed the API locally. To achieve the local deployment we used FastAPI's TestAPI  which tough meant for integration tests can also be used for a a localhosted API. This is ok for demonstration purposes of a frontend.*
 
---- question 24 fill here ---
+Yes. We deployed the API locally. To achieve the local deployment we used FastAPI's TestAPI  which tough meant for integration tests can also be used for a a localhosted API. This is ok for demonstration purposes of a frontend.
+
 
 ### Question 25
 
@@ -500,8 +502,8 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *before the service crashed.*
 >
 > Answer:
-> *Yes. We made two integration test of the API. The first, tests that the root health message is functioning. The second sends a mock call to the api and tests if the prediction has properties that must be true. The second test therefore requires the full inference classifier pipeline to function.
---- question 25 fill here ---
+
+Yes. We made two integration test of the API. The first, tests that the root health message is functioning. The second sends a mock call to the api and tests if the prediction has properties that must be true. The second test therefore requires the full inference classifier pipeline to function.
 
 ### Question 26
 
@@ -568,11 +570,11 @@ We implemented a streamlit frontend which for demonstration are run on localhost
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
 >
 > Answer:
-> *We made [this figure](../docs/images/architecture.png), which is also the root README.md. It shows a inference pipeline and a retraining pipeline.*
-> *- Inference pipeline: Illustrates a user sending a job vacancy input (green) to the streamlit frontend, it then sents the unprocessed text to the cloud hosted docker image, then further to the data preprocessing, then text embeddings to the classifyier, then a classification dataclass to the inference pipeline and a dict to FastAPI, then a json back to docker, which then present the classification results to the user.*
-> *- Retraining: Illustrates a developer that is alerted thorugh the datadrift rpeort, that retraing is overdue. He then triggers the training process, an uses new training data, assuming he as training data. A new model is trained and he replaces the old model with the updated one at the inference pipeline*
+>
+We made [this figure](../docs/images/architecture.png), which is also the root README.md. It shows a inference pipeline and a retraining pipeline.*
+- Inference pipeline: Illustrates a user sending a job vacancy input (green) to the streamlit frontend, it then sents the unprocessed text to the cloud hosted docker image, then further to the data preprocessing, then text embeddings to the classifyier, then a classification dataclass to the inference pipeline and a dict to FastAPI, then a json back to docker, which then present the classification results to the user.*
+- Retraining: Illustrates a developer that is alerted thorugh the datadrift rpeort, that retraing is overdue. He then triggers the training process, an uses new training data, assuming he as training data. A new model is trained and he replaces the old model with the updated one at the inference pipeline*
 
---- question 29 fill here ---
 
 ### Question 30
 
@@ -603,15 +605,6 @@ We implemented a streamlit frontend which for demonstration are run on localhost
 > *All members contributed to code by...*
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
-> *- s251297: made data_create data_preprocess, inference, api, frontend, data_drift, unittest of preprocess, integration test of api, pre-commit-config, several CLI invoke tasks, github workflows, mkdocs *
-fewafewubaofewnafioewnifowf ewafw afew afewafewafionewoanf waf ewonfieownaf fewnaiof newio fweanøf wea fewa
- fweafewa fewiagonwa ognwra'g
- wa
- gwreapig ipweroang w rag
- wa grwa
-  g
-  ew
-  gwea g
-  ew ag ioreabnguorwa bg̈́aw
-   wa
-   gew4igioera giroeahgi0wra gwa
+
+- s251297: made data_create data_preprocess, inference, api, frontend, data_drift, unittest of preprocess, integration test of api, pre-commit-config, several CLI invoke tasks, github workflows, mkdocs.
+- s251297 used GenAI to write prototypes of programs, write code snippets, to help understand bugs and as a Teaching Assistent.
