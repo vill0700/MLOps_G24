@@ -1,0 +1,60 @@
+name: "Build Training Docker Image"
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'dockerfiles/train.dockerfile'
+      - 'src/mlopsg24/model.py'
+      - 'src/mlopsg24/train.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+env:
+  PROJECT_ID: mlopsg24
+  REGION: europe-west1
+  REPOSITORY: mlops-images
+  IMAGE_NAME: train
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          IMAGE_LATEST="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest"
+
+          docker build \
+            -f dockerfiles/train.dockerfile \
+            -t ${IMAGE_TAG} \
+            -t ${IMAGE_LATEST} \
+            .
+
+          docker push ${IMAGE_TAG}
+          docker push ${IMAGE_LATEST}
+
+          echo "Image pushed to Artifact Registry"
+          echo "${IMAGE_TAG}"
+          echo "${IMAGE_LATEST}"
