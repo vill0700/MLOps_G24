@@ -69,7 +69,7 @@ will check the repositories and the code to verify your answers.
 * [ ] Write one or multiple configurations files for your experiments (M11)
 * [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
-* [ ] Use logging to log important events in your code (M14)
+* [x] Use logging to log important events in your code (M14)
 * [ ] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
@@ -188,7 +188,9 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 5 fill here ---
+- We used the MLOPS course cookiecutter template. The overall structre follows src/package_name convention which comforms to what uv build expects, whihc is the build system we use. We considered further folders to subdivede the content of src/package_name such as modules, core, inference etc, but we hope that the CLI in task.py work as an entry point to show the structure of the modules.*
+- task.py is situated at root, it would be cleaner to put .py files into src/. Typer does this nicely where a `[project.scripts] cli entry point` can be defined*
+- we have kept the folders we use an removed the ones we did not*
 
 ### Question 6
 
@@ -203,7 +205,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 6 fill here ---
+We implemented a ruff github workflow check, but removed it again because it kept failing. Ruff is also a bit too strict to be used as a workflow, more of a warning that can be used on demand in the VScode linting using for example pylance quickfix. It felt too uncontrollable to have ruff autoformat everything. We have done this by defining the fomratting in pyroject.toml [tool.ruff] section
 
 ## Version control
 
@@ -252,7 +254,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 9 fill here ---
+We did not implement pull request. We working on separate branches, using the branching starategy that each users had their separate branch. We made our individual changes in our own branch and then merge them to main
 
 ### Question 10
 
@@ -365,7 +367,8 @@ will check the repositories and the code to verify your answers.
 > *run of our main code at some point that showed ...*
 >
 > Answer:
-> *We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug: Evaluate in Debug Console.` to run selected line in python file in the debug terminal console.*
+
+We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug: Evaluate in Debug Console.` to run selected line in python file in the debug terminal console. We also used VScode's debugger to develop new smaller features or feature changes.
 
 --- question 16 fill here ---
 
@@ -508,8 +511,8 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *measure ... and ... that would inform us about this ... behaviour of our application.*
 >
 > Answer:
-> *we implemented a data drift reporting module that can be called on demand. It uses evdiently and checks if there are datadrift at the categorical data - which is still human readable, and at the embeddings - where ee only loaded a subset as the load time was quite large. The data drift report compares training to test data, and embeddings from 2022 to 2024 as a demonstration. A proper data drift report would compare an old data used for training to prediction data or newer labels*
---- question 26 fill here ---
+
+We implemented a data drift reporting module that can be called on demand. It uses evidently and checks if there are datadrift at the categorical data - which is still human readable, and at the embeddings - where ee only loaded a subset as the load time was quite large. The data drift report compares training to test data, and embeddings from 2022 to 2024 as a demonstration. A proper data drift report would compare an old data used for training to prediction data or newer labels
 
 ## Overall discussion of project
 
@@ -544,7 +547,8 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 >
 > Answer:
 
---- question 28 fill here ---
+We implemented a streamlit frontend which for demonstration are run on localhost, using CLI task lfrontend. We made the frontend ready to switch between localhost and a cloud hosted endpoint. The frontend uses FastAPIs lifetime management to only load trained models at startup, and delete them from memory afterwards
+
 
 ### Question 29
 
