@@ -140,19 +140,17 @@ will check the repositories and the code to verify your answers.
 > **did you choose to work with and did it help you complete the project?**
 >
 > Recommended answer length: 100-200 words.
-> We used
-> - GLiNER2 and SentenceTransformer, both libraries for NLP.
-> - Polars for a more stringent and  data frames
-> - Dataframely to do data validation. Data validation is not to be confused with unit testing of data, where the former is a executed when loading data in batches or tables, which is used in the training of a ML model ie. data enginering. Data testing latter is a logical test of the properties of a single data point often user inputtet, which test the boundries of a the inference functionality, ie. software engineering.
-> - we use dataclasses
->  - We considered using Pydantic BaseSettings to
-> Example:
-> *
 >
-> We used the third-party framework ... in our project. We used functionality ... and functionality ... from the*
-> *package to do ... and ... in our project*.
+> Example:
+> *We used the third-party framework ... in our project. We used functionality ... and functionality ... from the*
 >
 > Answer:
+> We used:
+> - GLiNER2 and SentenceTransformer, both libraries for NLP to clean and transform text into tensors easily used as inputtet for an ANN.
+> - Polars for more stringent datatypes and readable data transformations.
+> - Dataframely to do data validation of Polars DataFramses. Data validation is not to be confused with unit testing of data, where the former is a executed when loading data in batches or tables, which is used in the training of a ML model ie. data enginering. Data testing latter is a logical test of the properties of a single data point often user inputtet, which test the boundries of a the inference functionality, ie. software engineering.
+> - Dataclasses to structure data sent between modules.
+> - We considered using Pydantic BaseSettings along with .env file to centralise the repos shared settings and variables, but just made a dotenv() example.
 
 --- question 3 fill here ---
 
@@ -223,7 +221,7 @@ will check the repositories and the code to verify your answers.
 > *application but also ... .*
 >
 > Answer:
-
+> *We implemented 3 unit test testing the data preprocessing module. We implemented two integration tests of FastAPI. The integration test used a contex manager to ensure that the app runs it lifetime section.*
 --- question 7 fill here ---
 
 ### Question 8
@@ -285,6 +283,7 @@ will check the repositories and the code to verify your answers.
 > *here: <weblink>*
 >
 > Answer:
+> *We made a simple ruff test for linting into a GitHub Workflow. The workflow running the integration test is set to only run on linux, as the test downloads a huggingface model each time. we implemented caching of python, but skipped trying to cache the HF model. It would require that the workflow sets up defined cache for the HF model, or that the integrationtest is not made at the API endpoint but at code sections constitutiong the API*
 
 --- question 11 fill here ---
 
