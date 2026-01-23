@@ -69,7 +69,7 @@ class InferenceClassify:
 
         # load trained classifier to eval mode and cpu
         self.model_classifier = NeuralNetwork()
-        state_dict = torch.load(DEFAULT_OUTPUT)["state_dict"]
+        state_dict = torch.load(DEFAULT_OUTPUT, map_location="cpu")["state_dict"]
         self.model_classifier.load_state_dict(state_dict)
         self.model_classifier.eval()
 
