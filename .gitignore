@@ -15,7 +15,6 @@ manual_test/
 
 # training metrics
 reports/metrics.json
-reports/figures
 
 # other local dev info
 .vscode/
