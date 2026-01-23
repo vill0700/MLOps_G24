@@ -1,12 +1,13 @@
 import argparse
 from pathlib import Path
-from torch.nn.utils import prune
+
 import torch
 import wandb
 from loguru import logger
 from torch import nn
+from torch.nn.utils import prune
+from torch.profiler import ProfilerActivity, profile, tensorboard_trace_handler
 from torch.utils.data import DataLoader, TensorDataset
-from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 
 from mlopsg24.model import NeuralNetwork
 
@@ -284,7 +285,7 @@ def main() -> None:
         if device.type == "cuda":
             logger.info("Profiling both cpu and cuda")
             activities.append(ProfilerActivity.CUDA)
-        prof = profile(activities=activities, record_shapes=True, profile_memory=True, 
+        prof = profile(activities=activities, record_shapes=True, profile_memory=True,
                        on_trace_ready=tensorboard_trace_handler("./log/model_profile"))
         prof.start()
         is_profiling = True
