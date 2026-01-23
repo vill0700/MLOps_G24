@@ -303,7 +303,7 @@ We did not use DVC for our project. It would be relevant for our project if the 
 >
 > Answer:
 
-We used the argparse python package for handling arguments. The training file can be called with uv run or python3, for example from the root:
+We used the argparse python package for handling arguments. The training file can be called with uv run or python3, for example from the root to train for 15 epochs with learning rate 1e-3, and quantize model weights to int8 and prune the 20% smallest weights:
 uv run src/mlopsg24/train.py --epochs 15 --lr 1e-3 --quantize --prune
 
 ### Question 13
