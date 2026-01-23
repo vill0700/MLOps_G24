@@ -365,6 +365,7 @@ will check the repositories and the code to verify your answers.
 > *run of our main code at some point that showed ...*
 >
 > Answer:
+> *We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug: Evaluate in Debug Console.` to run selected line in python file in the debug terminal console.*
 
 --- question 16 fill here ---
 
@@ -459,6 +460,7 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *to the API to make it more ...*
 >
 > Answer:
+> *We wrote an API in FastAPI. This provided an endpoint for the classificaiton, and also returns usefull data of the predictions, susch as the probability distribution of the predciton the the classes. We also tryed to add a batch api process, but it would require refactioring the function that the API calls to expose the parts that can be batched*
 
 --- question 23 fill here ---
 
@@ -475,6 +477,7 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
 > Answer:
+> *Yes. We deployed the API locally. To achieve the local deployment we used FastAPI's TestAPI  which tough meant for integration tests can also be used for a a localhosted API. This is ok for demonstration purposes of a frontend.*
 
 --- question 24 fill here ---
 
@@ -490,7 +493,7 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *before the service crashed.*
 >
 > Answer:
-
+> *Yes. We made two integration test of the API. The first, tests that the root health message is functioning. The second sends a mock call to the api and tests if the prediction has properties that must be true. The second test therefore requires the full inference classifier pipeline to function.
 --- question 25 fill here ---
 
 ### Question 26
@@ -505,7 +508,7 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *measure ... and ... that would inform us about this ... behaviour of our application.*
 >
 > Answer:
-
+> *we implemented a data drift reporting module that can be called on demand. It uses evdiently and checks if there are datadrift at the categorical data - which is still human readable, and at the embeddings - where ee only loaded a subset as the load time was quite large. The data drift report compares training to test data, and embeddings from 2022 to 2024 as a demonstration. A proper data drift report would compare an old data used for training to prediction data or newer labels*
 --- question 26 fill here ---
 
 ## Overall discussion of project
@@ -557,6 +560,9 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
 >
 > Answer:
+> *We made [this figure](../docs/images/architecture.png), which is also the root README.md. It shows a inference pipeline and a retraining pipeline.*
+> *- Inference pipeline: Illustrates a user sending a job vacancy input (green) to the streamlit frontend, it then sents the unprocessed text to the cloud hosted docker image, then further to the data preprocessing, then text embeddings to the classifyier, then a classification dataclass to the inference pipeline and a dict to FastAPI, then a json back to docker, which then present the classification results to the user.*
+> *- Retraining: Illustrates a developer that is alerted thorugh the datadrift rpeort, that retraing is overdue. He then triggers the training process, an uses new training data, assuming he as training data. A new model is trained and he replaces the old model with the updated one at the inference pipeline*
 
 --- question 29 fill here ---
 
@@ -589,7 +595,7 @@ Training was started on the VM by running our training script with `uv`, e.g. `W
 > *All members contributed to code by...*
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
-
+> *- s251297: made data_create data_preprocess, inference, api, frontend, data_drift, unittest of preprocess, integration test of api, pre-commit-config, several CLI invoke tasks, github workflows, mkdocs *
 fewafewubaofewnafioewnifowf ewafw afew afewafewafionewoanf waf ewonfieownaf fewnaiof newio fweanøf wea fewa
  fweafewa fewiagonwa ognwra'g
  wa
