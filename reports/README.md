@@ -238,7 +238,7 @@ We implemented 3 unit test testing the data preprocessing module. We implemented
 >
 > Answer:
 
-using the following command: uv run coverage run --source=src/mlopsg24 -m pytest tests/ , we got a coverage of 30%. This is not a lot, and we could write much more if it was for a "real" project, but coverage does not tell the full story. The few tests we run are of high quality, testing a lot of things about the API and data.
+Using the following command on our source code: uv run coverage run --source=src/mlopsg24 -m pytest tests/ , we got a coverage of 30%. This is not a lot, and we should write much more if it was for a "real" project, but coverage also does not tell the full story, as you can write a lot of bad tests and get 100%, or have very large functions and only test small parts of them.
 
 ### Question 9
 
