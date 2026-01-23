@@ -339,13 +339,13 @@ The experiments were logged in Weights and Biases. For every run, the training l
 > Answer:
 
 Result from the hyperparameter sweep run of the validation set prediction accuracies, where it looks like experiments with lower learning rate had too few epochs to converge:
-[Sweep: Validation accuracy](figures/valacc.png)
+![Sweep: Validation accuracy](figures/valacc.png)
 
 Result from the hyperparameter sweep run of the resulting confusion matrices, where the models that did not converge had worse performance:
-[Sweep: Confusion matrix](figures/confus.png)
+![Sweep: Confusion matrix](figures/confus.png)
 
 And result from the hyperparameter sweep run of how the batch size and learning rate impacted the final validation accuracy, where it can be seen that the learning rate was very important and the batch size was not.
-[Sweep: Parameters](figures/sweepimg.png)
+![Sweep: Parameters](figures/sweepimg.png)
 
 
 ### Question 15
