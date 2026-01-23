@@ -583,7 +583,7 @@ We implemented a streamlit frontend which for demonstration are run on localhost
 >
 > Answer:
 >
-We made [this figure](../docs/images/architecture.png), which is also the root README.md. It shows a inference pipeline and a retraining pipeline.*
+We made the following figure ![this figure](../docs/images/architecture.png), which is also the root README.md. It shows a inference pipeline and a retraining pipeline.*
 - Inference pipeline: Illustrates a user sending a job vacancy input (green) to the streamlit frontend, it then sents the unprocessed text to the cloud hosted docker image, then further to the data preprocessing, then text embeddings to the classifyier, then a classification dataclass to the inference pipeline and a dict to FastAPI, then a json back to docker, which then present the classification results to the user.*
 - Retraining: Illustrates a developer that is alerted thorugh the datadrift rpeort, that retraing is overdue. He then triggers the training process, an uses new training data, assuming he as training data. A new model is trained and he replaces the old model with the updated one at the inference pipeline*
 
