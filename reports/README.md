@@ -393,7 +393,13 @@ We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following GCP services:
+- **Compute Engine**: VM instances for running training (CPU + GPU) and debugging runs.
+- **Cloud Storage (GCS)**: storing our processed dataset artifacts (e.g. `data/processed/*.pt`) and moving data between local and the VM.
+- **Artifact Registry**: storing Docker images built for the API.
+- **Cloud Build**: building/pushing Docker images to Artifact Registry from our repository.
+- **Cloud Run**: attempted deployment target for a CPU online inference endpoint.
+- **Cloud Logging / Log Explorer**: inspecting runtime logs from builds and deployments.
 
 ### Question 18
 
@@ -408,7 +414,13 @@ We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug
 >
 > Answer:
 
---- question 18 fill here ---
+We used Compute Engine to run training jobs remotely so we were not limited by local machine performance or local dependency constraints.
+
+We used two VM setups:
+- A **CPU VM** for initial end-to-end verification.
+- A **GPU VM** for faster training (we used an NVIDIA T4 when our preferred GPU type/zone had capacity issues).
+
+Our workflow was: connect with `gcloud compute ssh`, download the processed dataset from a GCS bucket using `gsutil`, then start training with our existing script using `uv run src/mlopsg24/train.py ...`. The outputs (model checkpoint under `models/` and figures under `reports/figures/`) were generated on the VM and copied back when needed.
 
 ### Question 19
 
@@ -417,7 +429,7 @@ We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug
 >
 > Answer:
 
---- question 19 fill here ---
+![gcs_bucket](figures/gcs_bucket.png)
 
 ### Question 20
 
@@ -426,7 +438,7 @@ We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug
 >
 > Answer:
 
---- question 20 fill here ---
+![artifact_registry](figures/artifact_registry.png)
 
 ### Question 21
 
@@ -435,7 +447,7 @@ We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug
 >
 > Answer:
 
---- question 21 fill here ---
+![cloud_build_history](figures/cloud_build_history.png)
 
 ### Question 22
 
@@ -451,7 +463,7 @@ We used VScode's debugger. In VScode Keyboard Shortcuts we have activated `Debug
 > Answer:
 
 
-We trained our model in the cloud using Google Compute Engine (Engine). We created and used a VM in our GCP project (`mlopsg24`) and connected to it using `gcloud compute ssh`. Our processed dataset (PyTorch tensors for train/val/test) was stored in Google Cloud Storage at `gs://mlops_g24_data/data/processed/`, and we downloaded it onto the VM using `gsutil`.
+We trained our model in the cloud using Google Compute Engine (Engine). We created and used a VM in our GCP project (`mlopsg24`) and connected to it using `gcloud compute ssh`. Our processed dataset (PyTorch tensors for train/val/test) was stored in Google Cloud Storage under `data/processed/`, and we downloaded it onto the VM using `gsutil`.
 
 Training was started on the VM by running our training script with `uv`, e.g. `WANDB_MODE=disabled uv run src/mlopsg24/train.py --data-dir data/processed --epochs 20`. The run completed in the cloud and produced artifacts on the VM (a saved model checkpoint under `models/` and evaluation figures under `reports/figures/`). We used Compute Engine because it gave us a straightforward way to run longer experiments on remote hardware without changing our code to fit a managed training service.
 
