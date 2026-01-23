@@ -53,7 +53,8 @@ The directory structure of the project looks like this:
 │   │   ├── data_preproces.py # module to embed texts
 │   │   ├── frontend.py       # streamlit frontend
 │   │   ├── inference.py      # inference pipeline on a single data point
-│   │   ├── models.py         # the ANN
+│   │   ├── model.py         # the ANN
+|   |   ├── modified_model_timer.py # times the standard, quantized, pruned and quant+pruned models
 │   │   ├── train.py          # training pipeline
 │   │   └── visualize.py      # N/A
 └── tests/
