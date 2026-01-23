@@ -551,7 +551,7 @@ We implemented a data drift reporting module that can be called on demand. It us
 >
 > Answer:
 
---- question 27 fill here ---
+We used around 8 credits in total during the project. The GPU VM was by far the most expensive service, especially during model training runs. Working in the cloud was a hassle in the beginning, setting up permissions, configuring VMs, and managing costs took some time to learn. However, once we got the hang of it, running experiments became easier and more efficient than working locally.
 
 ### Question 28
 
