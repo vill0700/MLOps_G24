@@ -440,6 +440,7 @@ Our workflow was: connect with `gcloud compute ssh`, download the processed data
 > Answer:
 
 ![artifact_registry](figures/artifact_registry.png)
+![artifact_registry](figures/artifact_registry1.png)
 
 ### Question 21
 
