@@ -348,20 +348,20 @@ wheels = [
 
 [[package]]
 name = "dataframely"
-version = "2.5.0"
+version = "2.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fsspec" },
     { name = "numpy" },
     { name = "polars" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/1c/1ccb3d5f2aba4ba35a26af380f88cdc91c8028ac8e59bd8a72da70aa2bc6/dataframely-2.5.0.tar.gz", hash = "sha256:307073154bda665fd7bb1bfaa413bbf60f3479de758dd85ad3bb5ceaddc4be1e", size = 381641, upload-time = "2026-01-14T17:13:08.834Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b4/77/73aad50970a2566d57d6077a1880fa013a48963326ff48adbabda62a8d32/dataframely-2.6.0.tar.gz", hash = "sha256:43c7eadf12b4a62e69ca85132f37360314619918e9892f25ea80b9674b267807", size = 403888, upload-time = "2026-01-19T17:41:09.522Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a5/80/b63b9ee639ebd39113d092e4508633095163c2004dbb3f588ca5308acfe3/dataframely-2.5.0-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:cf1b822a3b50c8411ce2ed50eb6fe2f386bf029d06df25a41d16ede8435e2641", size = 5156724, upload-time = "2026-01-14T17:13:00.482Z" },
-    { url = "https://files.pythonhosted.org/packages/40/28/d91abd9a6c987c3ae1d9a063b8959b0df10c0434e436384d138178d24d0d/dataframely-2.5.0-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:4fcfb312390d3819769298676cd694924a6c3a2908b16a129166450f745ab4ac", size = 4801770, upload-time = "2026-01-14T17:13:02.299Z" },
-    { url = "https://files.pythonhosted.org/packages/ea/cb/b1da6ce9d8db15cbceb8be2243ead23c3bd14cb5eeaca81b78bf9e157445/dataframely-2.5.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a984ef8a91415ae9d34003564833720f42a216bfea9223a8df86655ec761b05f", size = 5032913, upload-time = "2026-01-14T17:13:03.86Z" },
-    { url = "https://files.pythonhosted.org/packages/99/f5/4f8241ca8f363c13d5b9a3a62ddaa1547cfcfa45f6496d5b96a7ec53defe/dataframely-2.5.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ccbc5d0147095f146a52c56def76eb7e13d6538d366245062c7020c73c5c37d8", size = 5333985, upload-time = "2026-01-14T17:13:05.827Z" },
-    { url = "https://files.pythonhosted.org/packages/1a/ca/c3d837fd4e81f688af15ef9394e8964cf322974ab825559cce81ece304f5/dataframely-2.5.0-cp310-abi3-win_amd64.whl", hash = "sha256:7ee93aa32e6c7ef7791008a9a363b40cea47175e8a8b56833e27646a4d9b9082", size = 5349863, upload-time = "2026-01-14T17:13:07.365Z" },
+    { url = "https://files.pythonhosted.org/packages/97/60/4fab9d99542366d50c55eb43616b9fe5075effed90928108aee0477cf521/dataframely-2.6.0-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:f2697724ebfd68bf3a7c52c1afb939ca9e46dd1243c14d7770f3093de372648a", size = 5157164, upload-time = "2026-01-19T17:40:59.306Z" },
+    { url = "https://files.pythonhosted.org/packages/87/16/2d1be2e73cbc5eac2ce6cebfd6b5267590d9423c73ff0d258df8c996b512/dataframely-2.6.0-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:a3616a8cf5dfbf5851a05a5b5b77b8845d9696f87a890436b4077efaa0b11dd3", size = 4802209, upload-time = "2026-01-19T17:41:01.413Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/6e/e1695173f958f59861738610bdf580a8f8cced681e2257191b4e94d04249/dataframely-2.6.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:61cb934b0e6272e322b76cd5ca82ccda709913d453336be4b7828c90b9c23712", size = 5033353, upload-time = "2026-01-19T17:41:04.38Z" },
+    { url = "https://files.pythonhosted.org/packages/17/b6/3d814af025f94f9dc0c2200e3bd04a5d5f05ee0af6a35a61c03fc0826f80/dataframely-2.6.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2d5615c5cce8d4aa19149bb3d9ce498e22596b78c1b855b822ed5097b30e5d41", size = 5334423, upload-time = "2026-01-19T17:41:06.596Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/01/06696a9cfa49426e973a0d3c44e6a32654b44275429c612b90ce167d80a2/dataframely-2.6.0-cp310-abi3-win_amd64.whl", hash = "sha256:01cc13d6f7d48c6e4bf628c5118fd1be89b49b08d446b44dbf67f24a476b699e", size = 5350321, upload-time = "2026-01-19T17:41:08.11Z" },
 ]
 
 [[package]]
@@ -1490,7 +1490,7 @@ name = "nvidia-cudnn-cu12"
 version = "9.10.2.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas-cu12" },
+    { name = "nvidia-cublas-cu12", marker = "sys_platform == 'linux'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ba/51/e123d997aa098c61d029f76663dedbfb9bc8dcf8c60cbd6adbe42f76d049/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:949452be657fa16687d0930933f032835951ef0892b37d2d53824d1a84dc97a8", size = 706758467, upload-time = "2025-06-06T21:54:08.597Z" },
@@ -1501,7 +1501,7 @@ name = "nvidia-cufft-cu12"
 version = "11.3.3.83"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-nvjitlink-cu12" },
+    { name = "nvidia-nvjitlink-cu12", marker = "sys_platform == 'linux'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1f/13/ee4e00f30e676b66ae65b4f08cb5bcbb8392c03f54f2d5413ea99a5d1c80/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:4d2dd21ec0b88cf61b62e6b43564355e5222e4a3fb394cac0db101f2dd0d4f74", size = 193118695, upload-time = "2025-03-07T01:45:27.821Z" },
@@ -1528,9 +1528,9 @@ name = "nvidia-cusolver-cu12"
 version = "11.7.3.90"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas-cu12" },
-    { name = "nvidia-cusparse-cu12" },
-    { name = "nvidia-nvjitlink-cu12" },
+    { name = "nvidia-cublas-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cusparse-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-nvjitlink-cu12", marker = "sys_platform == 'linux'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/85/48/9a13d2975803e8cf2777d5ed57b87a0b6ca2cc795f9a4f59796a910bfb80/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:4376c11ad263152bd50ea295c05370360776f8c3427b30991df774f9fb26c450", size = 267506905, upload-time = "2025-03-07T01:47:16.273Z" },
@@ -1541,7 +1541,7 @@ name = "nvidia-cusparse-cu12"
 version = "12.5.8.93"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-nvjitlink-cu12" },
+    { name = "nvidia-nvjitlink-cu12", marker = "sys_platform == 'linux'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c2/f5/e1854cb2f2bcd4280c44736c93550cc300ff4b8c95ebe370d0aa7d2b473d/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:1ec05d76bbbd8b61b06a80e1eaf8cf4959c3d4ce8e711b65ebd0443bb0ebb13b", size = 288216466, upload-time = "2025-03-07T01:48:13.779Z" },
